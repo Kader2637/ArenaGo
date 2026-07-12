@@ -57,16 +57,16 @@ function downloadFile(fileUrl, dest) {
 async function run() {
   console.log('Downloading category and court assets...');
   for (const asset of assets) {
-    let destinationPath = asset.dest;
+    let fullPath;
 
     // Adjust destination for Vercel environment
     if (isVercel) {
       const vercelUploadDir = '/tmp/uploads';
-      fs.mkdirSync(vercelUploadDir, { recursive: true }); // Ensure /tmp/uploads exists
-      destinationPath = path.join(vercelUploadDir, path.basename(asset.dest));
+      fullPath = path.join(vercelUploadDir, path.basename(asset.dest));
+    } else {
+      fullPath = path.join(__dirname, '..', asset.dest);
     }
 
-    const fullPath = isVercel ? destinationPath : path.join(__dirname, '..', asset.dest);
     try {
       await downloadFile(asset.url, fullPath);
     } catch (err) {
