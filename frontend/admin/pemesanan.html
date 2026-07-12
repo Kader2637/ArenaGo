@@ -300,8 +300,8 @@
         verifyModal.hide();
         const data = await res.json();
         if (data.success) {
-          App.showAlert(action === 'verified' ? 'Pembayaran Disetujui!' : 'Pembayaran Ditolak', data.message, action === 'verified' ? 'success' : 'warning');
-          loadBookings();
+          await App.showAlert(action === 'verified' ? 'Pembayaran Disetujui!' : 'Pembayaran Ditolak', data.message, action === 'verified' ? 'success' : 'warning');
+          loadBookings(); // Reload data after alert is closed
         } else {
           App.showAlert('Gagal', data.message, 'error');
         }
@@ -332,7 +332,8 @@
         statusModal.hide();
         const data = await res.json();
         if (data.success) {
-          App.showAlert('Status Diperbarui!', data.message, 'success').then(() => loadBookings());
+          await App.showAlert('Status Diperbarui!', data.message, 'success');
+          loadBookings(); // Reload data after alert is closed
         } else {
           App.showAlert('Gagal', data.message, 'error');
         }
