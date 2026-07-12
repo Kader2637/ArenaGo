@@ -18,5 +18,7 @@ backend/uploads/*
 !backend/uploads/tennis.jpg
 !backend/uploads/volleyball.jpg
 !backend/uploads/baseball.jpg
+!backend/uploads/hockey.jpg
+!backend/uploads/hero_bg.jpg
 !backend/uploads/lapangan/
 
