@@ -6,7 +6,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Di Vercel, kita hanya bisa menulis ke direktori /tmp
     // Kita akan tetap membuat subfolder di dalam /tmp untuk kerapian.
-    const uploadPath = path.join('/tmp', 'uploads');
+    const uploadPath = path.join('/tmp', 'backend', 'uploads');
     fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
