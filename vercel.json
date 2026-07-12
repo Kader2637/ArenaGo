@@ -12,6 +12,10 @@
   ],
   "routes": [
     {
+      "src": "/uploads/(.*)",
+      "dest": "/tmp/backend/uploads/$1"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/backend/app.js"
     },
