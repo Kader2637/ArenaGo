@@ -6,7 +6,7 @@ class AnalyticsRepository {
     const totalCabangRes = await db.query(`SELECT COUNT(*) as count FROM cabang WHERE deleted_at IS NULL`);
     const totalLapanganRes = await db.query(`SELECT COUNT(*) as count FROM lapangan WHERE deleted_at IS NULL`);
     const totalCustomerRes = await db.query(`SELECT COUNT(*) as count FROM users WHERE role = 'customer' AND deleted_at IS NULL`);
-    
+
     const bookingStatsRes = await db.query(`
       SELECT 
         COUNT(*) as total_booking,
@@ -53,13 +53,13 @@ class AnalyticsRepository {
     `);
 
     return {
-      total_mitra: parseInt(totalMitraRes.rows[0].count || '0'),
-      total_cabang: parseInt(totalCabangRes.rows[0].count || '0'),
-      total_lapangan: parseInt(totalLapanganRes.rows[0].count || '0'),
-      total_customer: parseInt(totalCustomerRes.rows[0].count || '0'),
-      total_booking: parseInt(bookingStatsRes.rows[0].total_booking || '0'),
-      booking_hari_ini: parseInt(bookingStatsRes.rows[0].booking_hari_ini || '0'),
-      total_pendapatan: parseFloat(bookingStatsRes.rows[0].total_pendapatan || '0'),
+      total_mitra: parseInt(totalMitraRes.rows[0]?.count || '0'),
+      total_cabang: parseInt(totalCabangRes.rows[0]?.count || '0'),
+      total_lapangan: parseInt(totalLapanganRes.rows[0]?.count || '0'),
+      total_customer: parseInt(totalCustomerRes.rows[0]?.count || '0'),
+      total_booking: parseInt(bookingStatsRes.rows[0]?.total_booking || '0'),
+      booking_hari_ini: parseInt(bookingStatsRes.rows[0]?.booking_hari_ini || '0'),
+      total_pendapatan: parseFloat(bookingStatsRes.rows[0]?.total_pendapatan || '0'),
       top_category: topCategoryRes.rows[0] || null,
       top_mitra: topMitraRes.rows[0] || null,
       monthly_stats: monthlyStatsRes.rows
@@ -82,7 +82,7 @@ class AnalyticsRepository {
       WHERE c.mitra_id = $1
     `, [mitraId]);
 
-    const stats = bookingStatsRes.rows[0];
+    const stats = bookingStatsRes.rows[0] || {};
 
     // Occupancy Rate (Booked slots vs total possible slots for last 30 days)
     // Assume 14 operating hours daily per branch
@@ -99,7 +99,7 @@ class AnalyticsRepository {
         AND b.status IN ('approved', 'checked_in', 'playing', 'completed')
         AND b.tanggal >= CURRENT_DATE - INTERVAL '30 days'
     `, [mitraId]);
-    const bookedHours = parseFloat(bookedHoursRes.rows[0].booked_hours || '0');
+    const bookedHours = parseFloat(bookedHoursRes.rows[0]?.booked_hours || '0');
     const occupancyRate = totalPossibleHours > 0 ? (bookedHours / totalPossibleHours) * 100 : 0;
 
     // Peak booking hours
@@ -222,9 +222,9 @@ class AnalyticsRepository {
     `, [cabangId]);
 
     return {
-      today_bookings: parseInt(todayBookingsRes.rows[0].count || '0'),
-      pending_checkins: parseInt(pendingCheckinsRes.rows[0].count || '0'),
-      active_playing: parseInt(activePlayingRes.rows[0].count || '0')
+      today_bookings: parseInt(todayBookingsRes.rows[0]?.count || '0'),
+      pending_checkins: parseInt(pendingCheckinsRes.rows[0]?.count || '0'),
+      active_playing: parseInt(activePlayingRes.rows[0]?.count || '0')
     };
   }
 }
