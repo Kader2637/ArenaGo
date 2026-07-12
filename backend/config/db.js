@@ -1,35 +1,44 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const { Pool } = require("pg");
+require("dotenv").config();
 
-// Objek konfigurasi dasar dari environment variables
-const poolConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT, // Revert to original, let pg handle parsing
-  database: process.env.DB_DATABASE,
-  user: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-};
+let pool;
 
-// Automatically enable SSL for Vercel deployments or if the host is a Neon DB.
-// This allows the app to work seamlessly in production and local development against Neon.
-const isProduction = process.env.VERCEL_ENV === 'production';
-const isNeonHost = process.env.DB_HOST && process.env.DB_HOST.includes('neon.tech');
+if (process.env.DATABASE_URL) {
+  console.log("✅ Using DATABASE_URL");
 
-if (isProduction || isNeonHost) {
-  console.log('SSL for database connection is enabled.');
-  poolConfig.ssl = { rejectUnauthorized: false };
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  });
+} else {
+  console.log("✅ Using local PostgreSQL");
+
+  pool = new Pool({
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT) || 5432,
+    database: process.env.DB_DATABASE,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    ssl:
+      process.env.DB_HOST &&
+      process.env.DB_HOST.includes("neon.tech")
+        ? { rejectUnauthorized: false }
+        : false,
+  });
 }
 
-const pool = new Pool(poolConfig);
-
-// Tambahkan event listener untuk error pada pool koneksi
-pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
+pool.on("connect", () => {
+  console.log("✅ PostgreSQL Connected");
 });
 
-// Export object yang bisa digunakan di semua repository
+pool.on("error", (err) => {
+  console.error("❌ PostgreSQL Error:", err);
+});
+
 module.exports = {
   query: (text, params) => pool.query(text, params),
-  getClient: () => pool.connect(), // Expose connect method for transactions or direct client usage
+  getClient: () => pool.connect(),
+  pool,
 };
