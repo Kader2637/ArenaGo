@@ -33,10 +33,13 @@ class BaseRepository {
       queryText += ` ORDER BY ${sort}`;
     }
 
-    if (limit) {
-      queryText += ` LIMIT ${limit}`;
-      if (page) {
-        const offset = (page - 1) * limit;
+    // Ensure limit and page are integers for pagination
+    const limitInt = parseInt(limit, 10);
+    if (!isNaN(limitInt) && limitInt > 0) {
+      queryText += ` LIMIT ${limitInt}`;
+      const pageInt = parseInt(page, 10) || 1;
+      if (pageInt > 1) {
+        const offset = (pageInt - 1) * limitInt;
         queryText += ` OFFSET ${offset}`;
       }
     }
