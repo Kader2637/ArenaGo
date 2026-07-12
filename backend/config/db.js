@@ -10,14 +10,6 @@ const poolConfig = {
   password: process.env.DB_PASSWORD,
 };
 
-// Aktifkan SSL secara kondisional.
-// Gunakan variabel bawaan Vercel 'VERCEL_ENV' yang nilainya 'production' saat di-deploy.
-// Di lokal, variabel ini tidak ada (undefined), sehingga SSL akan dinonaktifkan.
-if (process.env.VERCEL_ENV === 'production') {
-  console.log('Production environment detected. Enabling SSL for database connection.');
-  poolConfig.ssl = { rejectUnauthorized: false };
-}
-
 // Buat instance Pool dengan konfigurasi yang sudah disesuaikan
 const pool = new Pool(poolConfig);
 

@@ -6,7 +6,7 @@ class BaseRepository {
   }
 
   async find(conditions = {}, options = {}) {
-    const { select = '*', limit, page, sort } = options;
+    const { select = '*', sort } = options;
     let queryText = `SELECT ${select} FROM ${this.tableName}`;
     const values = [];
     const keys = Object.keys(conditions);
@@ -31,17 +31,6 @@ class BaseRepository {
 
     if (sort) {
       queryText += ` ORDER BY ${sort}`;
-    }
-
-    // CRITICAL FIX: Always apply a sensible default limit to prevent memory crashes.
-    // This ensures that even if no limit is provided, we don't try to fetch the entire table.
-    const limitInt = parseInt(limit, 10) || 100; // Default to 100 if limit is not provided or invalid
-    const pageInt = parseInt(page, 10) || 1;
-    const offset = (pageInt - 1) * limitInt;
-
-    if (limitInt > 0) {
-      queryText += ` LIMIT ${limitInt}`;
-      if (offset > 0) queryText += ` OFFSET ${offset}`;
     }
 
     const result = await db.query(queryText, values);

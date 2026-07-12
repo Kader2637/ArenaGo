@@ -10,7 +10,6 @@ class BookingRepository extends BaseRepository {
   async findBookings(filters = {}, options = {}) {
     const { user_id, cabang_id, lapangan_id, status, tanggal, kode_booking, mitra_id } = filters;
     const { limit = 10, page = 1, sort = 'b.created_at DESC' } = options;
-    const offset = (page - 1) * limit;
 
     let queryText = `
       SELECT b.*, l.nama as nama_lapangan, c.nama as nama_cabang, c.kota, k.nama as nama_kategori,
@@ -60,7 +59,7 @@ class BookingRepository extends BaseRepository {
       ORDER BY ${sort}
       LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
-    values.push(limit, offset);
+    values.push(limit, (page - 1) * limit);
 
     const result = await db.query(queryText, values);
     return result.rows;
@@ -99,12 +98,12 @@ class BookingRepository extends BaseRepository {
         )
     `;
     const values = [lapanganId, tanggal, jamMulai, jamSelesai];
-    
+
     if (excludeBookingId) {
       queryText += ` AND id != $5`;
       values.push(excludeBookingId);
     }
-    
+
     const result = await db.query(queryText, values);
     return result.rows.length > 0;
   }
@@ -116,7 +115,7 @@ class BookingRepository extends BaseRepository {
       const keys = Object.keys(bookingData);
       const values = Object.values(bookingData);
       const placeholders = keys.map((_, idx) => `$${idx + 1}`).join(', ');
-      
+
       const insertBookingText = `INSERT INTO booking (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`;
       const bookingResult = await db.query(insertBookingText, values);
       const booking = bookingResult.rows[0];
@@ -192,7 +191,7 @@ class BookingRepository extends BaseRepository {
     const keys = Object.keys(paymentData);
     const values = Object.values(paymentData);
     const placeholders = keys.map((_, idx) => `$${idx + 1}`).join(', ');
-    
+
     // Check if payment already exists
     const check = await db.query(
       `SELECT id FROM pembayaran WHERE booking_id = $1`,

@@ -10,10 +10,7 @@ class FieldRepository extends BaseRepository {
   async findFields(filters = {}, options = {}) {
     const { cabang_id, kategori_id, tipe, status, search, min_price, max_price, kota } = filters;
 
-    // Sanitize and parse pagination options to prevent type errors
-    const limit = parseInt(options.limit, 10) || 10;
-    const page = parseInt(options.page, 10) || 1;
-    const sort = options.sort || 'l.created_at DESC';
+    const { limit = 10, page = 1, sort = 'l.created_at DESC' } = options;
     const offset = (page - 1) * limit;
 
     let queryText = `
