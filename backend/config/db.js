@@ -4,7 +4,7 @@ require('dotenv').config();
 // Objek konfigurasi dasar dari environment variables
 const poolConfig = {
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
+  port: parseInt(process.env.DB_PORT || '5432', 10),
   database: process.env.DB_DATABASE,
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
@@ -14,7 +14,7 @@ const poolConfig = {
 // Gunakan variabel bawaan Vercel 'VERCEL_ENV' yang nilainya 'production' saat di-deploy.
 // Di lokal, variabel ini tidak ada (undefined), sehingga SSL akan dinonaktifkan.
 if (process.env.VERCEL_ENV === 'production') {
-  console.log('Database connection is using SSL mode for production.');
+  console.log('Production environment detected. Enabling SSL for database connection.');
   poolConfig.ssl = { rejectUnauthorized: false };
 }
 
@@ -30,4 +30,5 @@ pool.on('error', (err, client) => {
 // Export object yang bisa digunakan di semua repository
 module.exports = {
   query: (text, params) => pool.query(text, params),
+  getClient: () => pool.connect(), // Expose connect method for transactions or direct client usage
 };

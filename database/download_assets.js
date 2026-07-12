@@ -5,14 +5,14 @@ const https = require('https');
 
 const assets = [
   // Categories
-  { url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/soccer.jpg' },
+  { url: 'https://images.unsplash.com/photo-1551958214-2d5b2df42a89?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/soccer.jpg' },
   { url: 'https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/futsal.jpg' },
   { url: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/badminton.jpg' },
   { url: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/basketball.jpg' },
   { url: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/tennis.jpg' },
   { url: 'https://images.unsplash.com/photo-1592656094267-764a45160876?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/volleyball.jpg' },
   { url: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/baseball.jpg' },
-  { url: 'https://images.unsplash.com/photo-1580748141549-71748d60bdc5?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/hockey.jpg' },
+  { url: 'https://images.unsplash.com/photo-1593341646782-e01659f75a6d?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/hockey.jpg' },
   // Courts
   { url: 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/lapangan/futsal_field.jpg' },
   { url: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/lapangan/badminton_field.jpg' },
@@ -56,27 +56,31 @@ function downloadFile(fileUrl, dest) {
 
 async function run() {
   console.log('Downloading category and court assets...');
-  for (const asset of assets) {
-    let fullPath;
 
-    // Adjust destination for Vercel environment
-    if (isVercel) {
-      // Recreate the 'backend/uploads' structure inside '/tmp'
-      // asset.dest is e.g., 'backend/uploads/soccer.jpg'
-      fullPath = path.join('/tmp', asset.dest);
-    } else {
-      fullPath = path.join(__dirname, '..', asset.dest);
-    }
+  const downloadPromises = assets.map(asset => {
+    return new Promise(async (resolve) => {
+      let fullPath;
 
-    try {
-      await downloadFile(asset.url, fullPath);
-    } catch (err) {
-      console.warn(`Failed to download ${asset.dest}: ${err.message}. Writing mock fallback...`);
-      // Writing a tiny mock file to avoid broken image links
-      ensureDirExists(fullPath);
-      fs.writeFileSync(fullPath, Buffer.from('RIFF....WEBPVP8 ', 'binary'));
-    }
-  }
+      // Adjust destination for Vercel environment
+      if (isVercel) {
+        // Recreate the 'backend/uploads' structure inside '/tmp'
+        fullPath = path.join('/tmp', asset.dest);
+      } else {
+        fullPath = path.join(__dirname, '..', asset.dest);
+      }
+
+      try {
+        await downloadFile(asset.url, fullPath);
+      } catch (err) {
+        console.warn(`Failed to download ${asset.dest}: ${err.message}. Writing mock fallback...`);
+        ensureDirExists(fullPath);
+        fs.writeFileSync(fullPath, Buffer.from('RIFF....WEBPVP8 ', 'binary'));
+      }
+      resolve();
+    });
+  });
+
+  await Promise.all(downloadPromises);
   console.log('Assets download done.');
 }
 
