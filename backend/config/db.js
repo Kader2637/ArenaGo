@@ -10,10 +10,10 @@ const poolConfig = {
   password: process.env.DB_PASSWORD,
 };
 
-// Aktifkan SSL hanya untuk lingkungan produksi (seperti Vercel)
+// Aktifkan SSL HANYA untuk lingkungan produksi (seperti Vercel)
 // Ini akan membaca variabel APP_ENV yang Anda set di Vercel
 if (process.env.APP_ENV === 'production') {
-  console.log('Database connection is using SSL mode for production.'); // Log untuk debugging di Vercel
+  console.log('SSL mode for database connection is ENABLED for production.'); // Log untuk debugging di Vercel
   poolConfig.ssl = {
     rejectUnauthorized: false
   };
