@@ -1,21 +1,22 @@
 # Dependencies
-node_modules/
-
-# Environment variables (JANGAN diupload ke GitHub!)
-.env
-
-# Uploads (file user, bukan kode)
-backend/uploads/*
-!backend/uploads/.gitkeep
-
-# OS files
-.DS_Store
-Thumbs.db
+/node_modules
 
 # Logs
+logs
 *.log
-npm-debug.log*
 
-# Editor
-.vscode/
-.idea/
+# Environment variables
+.env
+.env.local
+
+# Uploads - Ignore all files in uploads, but make exceptions for our seed assets
+backend/uploads/*
+!backend/uploads/soccer.jpg
+!backend/uploads/futsal.jpg
+!backend/uploads/badminton.jpg
+!backend/uploads/basketball.jpg
+!backend/uploads/tennis.jpg
+!backend/uploads/volleyball.jpg
+!backend/uploads/baseball.jpg
+!backend/uploads/lapangan/
+
