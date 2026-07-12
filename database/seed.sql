@@ -54,8 +54,7 @@ INSERT INTO kategori (id, nama, icon, gambar, deskripsi, status) VALUES
 ('0190a7e0-0000-7000-8000-300000000004', 'Basket', 'bi bi-activity', 'basketball.jpg', 'Lapangan basket indoor dan outdoor', 'aktif'),
 ('0190a7e0-0000-7000-8000-300000000005', 'Tennis', 'bi bi-circle-fill', 'tennis.jpg', 'Lapangan tenis clay dan hard court', 'aktif'),
 ('0190a7e0-0000-7000-8000-300000000006', 'Voli', 'bi bi-record-circle', 'volleyball.jpg', 'Lapangan voli pasir dan indoor', 'aktif'),
-('0190a7e0-0000-7000-8000-300000000007', 'Baseball', 'bi bi-globe', 'baseball.jpg', 'Fasilitas baseball batting cage', 'aktif'),
-('0190a7e0-0000-7000-8000-300000000008', 'Hockey', 'bi bi-trophy', 'hockey.jpg', 'Lapangan hoki field standar internasional', 'aktif');
+('0190a7e0-0000-7000-8000-300000000007', 'Baseball', 'bi bi-globe', 'baseball.jpg', 'Fasilitas baseball batting cage', 'aktif');
 
 -- Seed Facilities
 INSERT INTO fasilitas (id, nama, icon) VALUES
