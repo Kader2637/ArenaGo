@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kategori Olahraga - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css?v=1.2" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-5" style="min-height: 80vh;">
+    <div class="text-center mb-5">
+      <h1 class="fw-bold text-dark">Semua Cabang Olahraga</h1>
+      <p class="text-muted">Cari lapangan yang sesuai dengan olahraga kegemaran Anda</p>
+    </div>
+
+    <div class="row g-4" id="all-categories-list">
+      <!-- Loading Skeletons -->
+      <div class="col-md-6 col-lg-4">
+        <div class="premium-card skeleton" style="height: 150px;"></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="premium-card skeleton" style="height: 150px;"></div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="premium-card skeleton" style="height: 150px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllCategories();
+    });
+
+    async function loadAllCategories() {
+      App.showLoader();
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/kategori/stats`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          renderCategories(res.data);
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function renderCategories(categories) {
+      const container = document.getElementById('all-categories-list');
+      container.innerHTML = '';
+
+      if (categories.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada kategori terdaftar</div>`;
+        return;
+      }
+
+      categories.forEach(cat => {
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        const imageSrc = cat.gambar ? `${BASE_URL}/uploads/${cat.gambar}` : '/assets/images/default-sport.jpg';
+        
+        card.innerHTML = `
+          <div class="premium-card h-100 d-flex align-items-center p-4 bg-white" onclick="window.location.href='/customer/lapangan.html?kategori_id=${cat.id}'" style="cursor: pointer;">
+            <div class="category-icon shadow-sm me-4">
+              <i class="${cat.icon || 'bi bi-activity'}"></i>
+            </div>
+            <div>
+              <h4 class="fw-bold mb-1 text-dark">${cat.nama}</h4>
+              <p class="text-muted small mb-2 text-truncate" style="max-width: 220px;">${cat.deskripsi || 'Sewa lapangan olahraga premium.'}</p>
+              <span class="badge bg-primary-subtle text-primary">${cat.jumlah_lapangan} Lapangan Tersedia</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Lapangan - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Lapangan Olahraga</h1>
+          <p class="text-muted">Kelola rincian unit lapangan, spesifikasi lantai/kapasitas, fasilitas, dan variasi harga.</p>
+        </div>
+        <button class="btn btn-primary rounded fw-bold gradient-btn" onclick="openAddFieldModal()"><i class="bi bi-plus-lg"></i> Tambah Lapangan</button>
+      </div>
+
+      <!-- Fields Table -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Cabang</th>
+              <th>Kategori</th>
+              <th>Nama Lapangan</th>
+              <th>Harga/Jam</th>
+              <th>Tipe</th>
+              <th>Status</th>
+              <th class="text-end">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="fields-table-body">
+            <tr>
+              <td colspan="7" class="text-center text-muted">Memuat data lapangan...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Field Modal Popup -->
+  <div class="modal fade" id="fieldModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0" id="field-modal-title">Tambah Lapangan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="field-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="field-id">
+
+            <div class="row g-3">
+              <div class="col-md-6" id="cabang-select-col">
+                <label for="field-cabang" class="form-label fw-bold text-secondary">Pilih Cabang</label>
+                <select class="form-select" id="field-cabang" required>
+                  <option value="">Pilih Cabang...</option>
+                </select>
+              </div>
+
+              <div class="col-md-6" id="kategori-select-col">
+                <label for="field-kategori" class="form-label fw-bold text-secondary">Kategori Olahraga</label>
+                <select class="form-select" id="field-kategori" required>
+                  <option value="">Pilih Kategori...</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label for="field-nama" class="form-label fw-bold text-secondary">Nama Lapangan</label>
+                <input type="text" class="form-control" id="field-nama" placeholder="Contoh: Lapangan A Vinyl" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="field-harga" class="form-label fw-bold text-secondary">Harga Sewa / Jam</label>
+                <input type="number" class="form-control" id="field-harga" placeholder="Rp" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="field-tipe" class="form-label fw-bold text-secondary">Tipe</label>
+                <select class="form-select" id="field-tipe">
+                  <option value="indoor" selected>Indoor</option>
+                  <option value="outdoor">Outdoor</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label for="field-capacity" class="form-label fw-bold text-secondary">Kapasitas</label>
+                <input type="text" class="form-control" id="field-capacity" placeholder="10 Pemain">
+              </div>
+
+              <div class="col-md-4">
+                <label for="field-size" class="form-label fw-bold text-secondary">Ukuran</label>
+                <input type="text" class="form-control" id="field-size" placeholder="25m x 15m">
+              </div>
+
+              <div class="col-md-4">
+                <label for="field-floor" class="form-label fw-bold text-secondary">Jenis Lantai</label>
+                <input type="text" class="form-control" id="field-floor" placeholder="Vinyl / Rumput">
+              </div>
+
+              <div class="col-12">
+                <label for="field-desc" class="form-label fw-bold text-secondary">Deskripsi Lapangan</label>
+                <textarea class="form-control" id="field-desc" rows="3" placeholder="Tulis spesifikasi lengkap..."></textarea>
+              </div>
+
+              <div class="col-md-6" id="status-row">
+                <label for="field-status" class="form-label fw-bold text-secondary">Status Lapangan</label>
+                <select class="form-select" id="field-status">
+                  <option value="aktif" selected>Aktif</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="tidak_aktif">Tidak Aktif</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="field-photo" class="form-label fw-bold text-secondary">Foto Lapangan Utama</label>
+                <input type="file" class="form-control" id="field-photo" accept="image/*">
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Facilities Checkbox Modal Popup -->
+  <div class="modal fade" id="facilitiesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Tautkan Fasilitas Lapangan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="facilities-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="fac-field-id">
+            <p class="text-muted small mb-3">Centang fasilitas pendukung yang tersedia pada unit lapangan ini.</p>
+            
+            <div class="row g-3" id="facilities-checkbox-container">
+              <!-- Render checkboxes dynamic -->
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Simpan Fasilitas</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Dynamic Pricing Modal Popup -->
+  <div class="modal fade" id="pricingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Kelola Dynamic Pricing (Harga Kustom)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="pricing-field-id">
+          
+          <div class="row g-3 align-items-end mb-4 border pb-3 p-3 rounded bg-light">
+            <div class="col-md-3">
+              <label for="price-day" class="form-label fw-bold text-secondary small">Hari</label>
+              <select class="form-select form-select-sm" id="price-day">
+                <option value="0">Minggu (Sunday)</option>
+                <option value="1">Senin</option>
+                <option value="2">Selasa</option>
+                <option value="3">Rabu</option>
+                <option value="4">Kamis</option>
+                <option value="5">Jumat</option>
+                <option value="6">Sabtu (Saturday)</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="price-start" class="form-label fw-bold text-secondary small">Jam Mulai</label>
+              <input type="time" class="form-control form-control-sm" id="price-start">
+            </div>
+            <div class="col-md-3">
+              <label for="price-end" class="form-label fw-bold text-secondary small">Jam Selesai</label>
+              <input type="time" class="form-control form-control-sm" id="price-end">
+            </div>
+            <div class="col-md-3">
+              <label for="price-val" class="form-label fw-bold text-secondary small">Harga Sewa/Jam</label>
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control" id="price-val" placeholder="Rp">
+                <button onclick="addPricingOverride()" class="btn btn-primary fw-bold" type="button">Tambah</button>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold mb-2">Daftar Penyesuaian Harga Kustom:</h6>
+          <table class="table table-bordered small align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Hari</th>
+                <th>Rentang Jam</th>
+                <th class="text-end">Harga Kustom / Jam</th>
+                <th class="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="pricing-overrides-list">
+              <tr>
+                <td colspan="4" class="text-center text-muted">Belum ada penyesuaian harga khusus.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Field Gallery Photos Modal Popup -->
+  <div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Galeri Foto Lapangan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="gallery-field-id">
+
+          <!-- Add Photo Form -->
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-secondary">Unggah Foto Lapangan Baru</label>
+            <form id="add-photo-form" class="input-group">
+              <input type="file" class="form-control" id="gallery-file-input" accept="image/*" required>
+              <button class="btn btn-primary fw-bold" type="submit">Unggah</button>
+            </form>
+          </div>
+
+          <hr>
+
+          <h6 class="fw-bold mb-3">Foto di Galeri Lapangan:</h6>
+          <div class="row g-2" id="gallery-photos-container">
+            <!-- Dyn elements -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['mitra']);
+
+    let fieldModalObj = null;
+    let facilitiesModalObj = null;
+    let pricingModalObj = null;
+    let galleryModalObj = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fieldModalObj = new bootstrap.Modal(document.getElementById('fieldModal'));
+      facilitiesModalObj = new bootstrap.Modal(document.getElementById('facilitiesModal'));
+      pricingModalObj = new bootstrap.Modal(document.getElementById('pricingModal'));
+      galleryModalObj = new bootstrap.Modal(document.getElementById('galleryModal'));
+
+      loadFieldsTable();
+      loadDropdownOptions();
+
+      document.getElementById('field-form').addEventListener('submit', handleFieldSubmit);
+      document.getElementById('facilities-form').addEventListener('submit', handleFacilitiesSubmit);
+      document.getElementById('add-photo-form').addEventListener('submit', handlePhotoSubmit);
+    });
+
+    async function loadDropdownOptions() {
+      // 1. Fetch owned branches
+      try {
+        const cabangRes = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang`);
+        if (cabangRes.ok) {
+          const res = await cabangRes.json();
+          const select = document.getElementById('field-cabang');
+          res.data.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nama;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) { console.error(err); }
+
+      // 2. Fetch active categories
+      try {
+        const catRes = await fetch(`${BASE_URL}/api/v1/kategori`);
+        if (catRes.ok) {
+          const res = await catRes.json();
+          const select = document.getElementById('field-kategori');
+          res.data.forEach(k => {
+            const opt = document.createElement('option');
+            opt.value = k.id;
+            opt.textContent = k.nama;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function loadFieldsTable() {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTable(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTable(fields) {
+      const tbody = document.getElementById('fields-table-body');
+      tbody.innerHTML = '';
+
+      if (fields.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Belum ada lapangan terdaftar. Klik Tambah untuk membuat baru.</td></tr>`;
+        return;
+      }
+
+      fields.forEach(f => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><small class="text-dark fw-bold">${f.nama_cabang}</small></td>
+          <td><span class="badge bg-secondary-subtle text-secondary">${f.nama_kategori}</span></td>
+          <td><strong class="text-dark">${f.nama}</strong></td>
+          <td><strong class="text-primary">${App.formatRupiah(parseFloat(f.harga_per_jam))}</strong></td>
+          <td><span class="badge bg-light text-dark text-capitalize border">${f.tipe}</span></td>
+          <td>
+            <span class="badge ${f.status === 'aktif' ? 'bg-success' : f.status === 'maintenance' ? 'bg-warning text-dark' : 'bg-danger'}">${f.status}</span>
+          </td>
+          <td class="text-end">
+            <button onclick="openGalleryModal('${f.id}')" class="btn btn-sm btn-outline-info rounded me-1" title="Galeri Foto"><i class="bi bi-images"></i> Foto</button>
+            <button onclick="openFacilitiesModal('${f.id}')" class="btn btn-sm btn-outline-info rounded me-1" title="Fasilitas"><i class="bi bi-check2-circle"></i> Fasilitas</button>
+            <button onclick="openPricingModal('${f.id}')" class="btn btn-sm btn-outline-warning rounded me-1" title="Dynamic Pricing"><i class="bi bi-currency-dollar"></i> Harga</button>
+            <button onclick="openEditFieldModal('${f.id}', '${f.cabang_id}', '${f.kategori_id}', '${f.nama}', '${f.harga_per_jam}', '${f.tipe}', '${f.kapasitas}', '${f.ukuran}', '${f.jenis_lantai}', '${f.deskripsi}', '${f.status}')" class="btn btn-sm btn-outline-primary rounded me-1" title="Ubah"><i class="bi bi-pencil"></i></button>
+            <button onclick="deleteLapangan('${f.id}', '${f.nama}')" class="btn btn-sm btn-outline-danger rounded" title="Hapus"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function openAddFieldModal() {
+      document.getElementById('field-modal-title').textContent = 'Tambah Lapangan Baru';
+      document.getElementById('field-id').value = '';
+      document.getElementById('field-cabang').value = '';
+      document.getElementById('field-kategori').value = '';
+      document.getElementById('field-nama').value = '';
+      document.getElementById('field-harga').value = '';
+      document.getElementById('field-tipe').value = 'indoor';
+      document.getElementById('field-capacity').value = '';
+      document.getElementById('field-size').value = '';
+      document.getElementById('field-floor').value = '';
+      document.getElementById('field-desc').value = '';
+      document.getElementById('field-photo').value = '';
+      document.getElementById('cabang-select-col').classList.remove('d-none');
+      document.getElementById('kategori-select-col').classList.remove('d-none');
+      document.getElementById('status-row').classList.add('d-none');
+      
+      fieldModalObj.show();
+    }
+
+    function openEditFieldModal(id, cabangId, kategoriId, nama, harga, tipe, kapasitas, ukuran, jenisLantai, desc, status) {
+      document.getElementById('field-modal-title').textContent = 'Ubah Lapangan';
+      document.getElementById('field-id').value = id;
+      document.getElementById('field-cabang').value = cabangId;
+      document.getElementById('field-kategori').value = kategoriId;
+      document.getElementById('field-nama').value = nama;
+      document.getElementById('field-harga').value = parseInt(harga);
+      document.getElementById('field-tipe').value = tipe;
+      document.getElementById('field-capacity').value = kapasitas === 'null' ? '' : kapasitas;
+      document.getElementById('field-size').value = ukuran === 'null' ? '' : ukuran;
+      document.getElementById('field-floor').value = jenisLantai === 'null' ? '' : jenisLantai;
+      document.getElementById('field-desc').value = desc === 'null' ? '' : desc;
+      document.getElementById('field-status').value = status;
+      document.getElementById('field-photo').value = '';
+      document.getElementById('cabang-select-col').classList.add('d-none');
+      document.getElementById('kategori-select-col').classList.add('d-none');
+      document.getElementById('status-row').classList.remove('d-none');
+
+      fieldModalObj.show();
+    }
+
+    async function handleFieldSubmit(e) {
+      e.preventDefault();
+
+      const id = document.getElementById('field-id').value;
+      const fileInput = document.getElementById('field-photo');
+      const file = fileInput.files[0];
+
+      const formData = new FormData();
+      formData.append('nama', document.getElementById('field-nama').value.trim());
+      formData.append('harga_per_jam', document.getElementById('field-harga').value);
+      formData.append('tipe', document.getElementById('field-tipe').value);
+      formData.append('kapasitas', document.getElementById('field-capacity').value.trim());
+      formData.append('ukuran', document.getElementById('field-size').value.trim());
+      formData.append('jenis_lantai', document.getElementById('field-floor').value.trim());
+      formData.append('deskripsi', document.getElementById('field-desc').value.trim());
+      
+      if (file) formData.append('foto', file);
+
+      if (id) {
+        formData.append('status', document.getElementById('field-status').value);
+      } else {
+        formData.append('cabang_id', document.getElementById('field-cabang').value);
+        formData.append('kategori_id', document.getElementById('field-kategori').value);
+      }
+
+      App.showLoader();
+      try {
+        let response;
+        if (id) {
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/${id}`, {
+            method: 'PUT',
+            body: formData
+          });
+        } else {
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan`, {
+            method: 'POST',
+            body: formData
+          });
+        }
+        App.hideLoader();
+
+        if (response.ok) {
+          fieldModalObj.hide();
+          App.showToast('Data lapangan berhasil disimpan', 'success');
+          loadFieldsTable();
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal Menyimpan', res.message || 'Gagal menyimpan.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function deleteLapangan(id, nama) {
+      App.showConfirm('Hapus Lapangan', `Hapus lapangan ${nama}?`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/${id}`, {
+              method: 'DELETE'
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Lapangan dihapus', 'success');
+              loadFieldsTable();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    // Facilities binder
+    async function openFacilitiesModal(fieldId) {
+      document.getElementById('fac-field-id').value = fieldId;
+      const container = document.getElementById('facilities-checkbox-container');
+      container.innerHTML = `<div class="text-center py-2"><div class="spinner-border text-primary spinner-border-sm"></div></div>`;
+      
+      facilitiesModalObj.show();
+
+      try {
+        // Fetch global facilities
+        const globalRes = await fetch(`${BASE_URL}/api/v1/lapangan`); // we query details below, let's load static options
+        // Static standard facilities seed match
+        const facilitiesList = [
+          { id: '0190a7e0-0000-7000-8000-080000000001', nama: '🚿 Shower' },
+          { id: '0190a7e0-0000-7000-8000-080000000002', nama: '🚗 Parkir' },
+          { id: '0190a7e0-0000-7000-8000-080000000003', nama: '📶 Wifi' },
+          { id: '0190a7e0-0000-7000-8000-080000000004', nama: '🕌 Musholla' },
+          { id: '0190a7e0-0000-7000-8000-080000000005', nama: '🚾 Toilet' },
+          { id: '0190a7e0-0000-7000-8000-080000000006', nama: '☕ Kantin' },
+          { id: '0190a7e0-0000-7000-8000-080000000007', nama: '👕 Ruang Ganti' },
+          { id: '0190a7e0-0000-7000-8000-080000000008', nama: '📣 Tribun' },
+          { id: '0190a7e0-0000-7000-8000-080000000009', nama: '💡 Lampu Malam' }
+        ];
+
+        // Fetch current field details
+        const fieldRes = await fetch(`${BASE_URL}/api/v1/lapangan/${fieldId}`);
+        if (fieldRes.ok) {
+          const res = await fieldRes.json();
+          const activeIds = res.data.fasilitas.map(f => f.id);
+          renderFacilitiesCheckboxes(facilitiesList, activeIds);
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    function renderFacilitiesCheckboxes(list, activeIds) {
+      const container = document.getElementById('facilities-checkbox-container');
+      container.innerHTML = '';
+
+      list.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'col-6 col-md-4';
+        
+        const isChecked = activeIds.includes(f.id) ? 'checked' : '';
+        div.innerHTML = `
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="fac-item" value="${f.id}" id="fac-${f.id}" ${isChecked}>
+            <label class="form-check-label text-dark" for="fac-${f.id}">${f.nama}</label>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function handleFacilitiesSubmit(e) {
+      e.preventDefault();
+      
+      const fieldId = document.getElementById('fac-field-id').value;
+      const checkedBoxes = document.querySelectorAll('input[name="fac-item"]:checked');
+      const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/${fieldId}/facilities`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fasilitas_ids: selectedIds })
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          facilitiesModalObj.hide();
+          App.showToast('Fasilitas berhasil disimpan', 'success');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    // Dynamic Pricing override
+    async function openPricingModal(fieldId) {
+      document.getElementById('pricing-field-id').value = fieldId;
+      document.getElementById('price-start').value = '18:00';
+      document.getElementById('price-end').value = '22:00';
+      document.getElementById('price-val').value = '';
+      
+      loadPricingOverrides(fieldId);
+      pricingModalObj.show();
+    }
+
+    async function loadPricingOverrides(fieldId) {
+      const container = document.getElementById('pricing-overrides-list');
+      container.innerHTML = `<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary spinner-border-sm"></div></td></tr>`;
+      
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/lapangan/${fieldId}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderPricingOverrides(res.data.harga_dinamis);
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    function renderPricingOverrides(list) {
+      const container = document.getElementById('pricing-overrides-list');
+      container.innerHTML = '';
+
+      if (!list || list.length === 0) {
+        container.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada penyesuaian harga khusus hari/jam.</td></tr>`;
+        return;
+      }
+
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+      list.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${days[p.hari]}</strong></td>
+          <td><small class="text-muted"><i class="bi bi-clock me-1"></i>${p.jam_mulai.slice(0, 5)} - ${p.jam_selesai.slice(0, 5)}</small></td>
+          <td class="text-end fw-bold text-primary">${App.formatRupiah(parseFloat(p.harga))}</td>
+          <td class="text-center">
+            <button onclick="removePricingOverride('${p.id}')" class="btn btn-sm btn-outline-danger py-0" title="Hapus"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    async function addPricingOverride() {
+      const fieldId = document.getElementById('pricing-field-id').value;
+      const hari = document.getElementById('price-day').value;
+      const jam_mulai = document.getElementById('price-start').value + ':00';
+      const jam_selesai = document.getElementById('price-end').value + ':00';
+      const harga = document.getElementById('price-val').value;
+
+      if (!harga) {
+        App.showAlert('Error', 'Silakan isi kolom harga.', 'warning');
+        return;
+      }
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/${fieldId}/dynamic-pricing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hari: parseInt(hari), jam_mulai, jam_selesai, harga })
+        });
+        App.hideLoader();
+        if (response.ok) {
+          App.showToast('Harga kustom ditambahkan', 'success');
+          loadPricingOverrides(fieldId);
+        } else {
+          App.showAlert('Gagal Menyimpan', 'Gagal memproses pricing override.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function removePricingOverride(priceId) {
+      const fieldId = document.getElementById('pricing-field-id').value;
+      
+      App.showConfirm('Hapus Harga Kustom', 'Kembalikan rentang jam ini ke harga sewa dasar?').then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/dynamic-pricing/${priceId}`, {
+              method: 'DELETE'
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Harga kustom dihapus', 'success');
+              loadPricingOverrides(fieldId);
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    // Gallery manager
+    async function openGalleryModal(fieldId) {
+      document.getElementById('gallery-field-id').value = fieldId;
+      document.getElementById('gallery-file-input').value = '';
+      
+      loadGalleryPhotos(fieldId);
+      galleryModalObj.show();
+    }
+
+    async function loadGalleryPhotos(fieldId) {
+      const container = document.getElementById('gallery-photos-container');
+      container.innerHTML = `<div class="text-center py-2"><div class="spinner-border text-primary spinner-border-sm"></div></div>`;
+
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/lapangan/${fieldId}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderGalleryPhotos(res.data.galeri, fieldId);
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    function renderGalleryPhotos(photosList, fieldId) {
+      const container = document.getElementById('gallery-photos-container');
+      container.innerHTML = '';
+
+      if (!photosList || photosList.length === 0) {
+        container.innerHTML = `<div class="text-muted small p-2 bg-light rounded w-100">Belum ada foto galeri pendukung.</div>`;
+        return;
+      }
+
+      photosList.forEach(ph => {
+        const col = document.createElement('div');
+        col.className = 'col-4 col-sm-3 position-relative mb-2';
+        
+        col.innerHTML = `
+          <div class="ratio ratio-1x1 border rounded overflow-hidden shadow-sm">
+            <img src="${BASE_URL}/uploads/lapangan/${ph.foto}" class="object-fit-cover">
+          </div>
+          <button onclick="deleteGalleryPhoto('${fieldId}', '${ph.id}')" class="btn btn-sm btn-danger rounded-circle position-absolute top-0 end-0 m-1" style="width: 24px; height: 24px; padding: 0;" title="Hapus"><i class="bi bi-x-lg" style="font-size: 10px;"></i></button>
+        `;
+        container.appendChild(col);
+      });
+    }
+
+    async function handlePhotoSubmit(e) {
+      e.preventDefault();
+      
+      const fieldId = document.getElementById('gallery-field-id').value;
+      const fileInput = document.getElementById('gallery-file-input');
+      const file = fileInput.files[0];
+
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('foto_lapangan', file);
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/${fieldId}/gallery`, {
+          method: 'POST',
+          body: formData
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          document.getElementById('gallery-file-input').value = '';
+          App.showToast('Foto galeri diunggah', 'success');
+          loadGalleryPhotos(fieldId);
+        } else {
+          App.showAlert('Gagal Unggah', 'Gagal memproses berkas galeri.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function deleteGalleryPhoto(fieldId, photoId) {
+      App.showConfirm('Hapus Foto', 'Hapus foto ini dari galeri lapangan?').then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/lapangan/gallery/${photoId}`, {
+              method: 'DELETE'
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Foto dihapus', 'success');
+              loadGalleryPhotos(fieldId);
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

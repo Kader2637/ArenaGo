@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cari Lapangan Olahraga - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css?v=1.2" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-5">
+    <div class="row g-4">
+      
+      <!-- Filter Sidebar Panel -->
+      <div class="col-lg-3">
+        <div class="premium-card p-4 bg-white sticky-lg-top" style="top: 100px; z-index: 5;">
+          <h5 class="fw-bold mb-4"><i class="bi bi-funnel-fill text-primary me-2"></i>Filter Pencarian</h5>
+          
+          <form id="filter-form">
+            <div class="mb-3">
+              <label for="search-input" class="form-label fw-semibold text-secondary">Cari Lapangan</label>
+              <input type="text" class="form-control" id="search-input" placeholder="Nama lapangan...">
+            </div>
+
+            <div class="mb-3">
+              <label for="kota-input" class="form-label fw-semibold text-secondary">Kota</label>
+              <input type="text" class="form-control" id="kota-input" placeholder="Contoh: Malang">
+            </div>
+
+            <div class="mb-3">
+              <label for="kategori-select" class="form-label fw-semibold text-secondary">Kategori Olahraga</label>
+              <select class="form-select" id="kategori-select">
+                <option value="">Semua Kategori</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-secondary">Tipe Lapangan</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="tipe-radio" id="tipe-all" value="" checked>
+                <label class="form-check-label text-muted" for="tipe-all">Semua Tipe</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="tipe-radio" id="tipe-indoor" value="indoor">
+                <label class="form-check-label text-muted" for="tipe-indoor">Indoor</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="tipe-radio" id="tipe-outdoor" value="outdoor">
+                <label class="form-check-label text-muted" for="tipe-outdoor">Outdoor</label>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-secondary">Rentang Harga (Per Jam)</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="number" class="form-control" id="min-price" placeholder="Min (Rp)">
+                </div>
+                <div class="col-6">
+                  <input type="number" class="form-control" id="max-price" placeholder="Max (Rp)">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 gradient-btn fw-bold py-2 rounded">
+              Terapkan Filter
+            </button>
+            <button type="button" onclick="resetFilters()" class="btn btn-outline-secondary w-100 fw-bold py-2 rounded mt-2">
+              Reset
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Fields Listing Panel -->
+      <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="fw-bold mb-0">Hasil Pencarian</h3>
+          <span class="text-muted" id="results-count">Menemukan 0 Lapangan</span>
+        </div>
+
+        <div class="row g-4" id="fields-list-container">
+          <!-- Loading skeletons -->
+          <div class="col-md-6 col-lg-4">
+            <div class="premium-card skeleton" style="height: 350px;"></div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="premium-card skeleton" style="height: 350px;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Sync URL parameters into fields inputs on load
+      const searchParam = App.getQueryParam('search');
+      const kotaParam = App.getQueryParam('kota');
+      const kategoriParam = App.getQueryParam('kategori_id');
+      const tipeParam = App.getQueryParam('tipe');
+
+      if (searchParam) document.getElementById('search-input').value = searchParam;
+      if (kotaParam) document.getElementById('kota-input').value = kotaParam;
+      if (tipeParam) {
+        document.querySelector(`input[name="tipe-radio"][value="${tipeParam}"]`).checked = true;
+      }
+
+      await loadKategoriSelect(kategoriParam);
+      loadFields();
+
+      // Submit filters
+      document.getElementById('filter-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        loadFields();
+      });
+    });
+
+    async function loadKategoriSelect(selectedId) {
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/kategori`);
+        if (response.ok) {
+          const res = await response.json();
+          const select = document.getElementById('kategori-select');
+          res.data.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat.id;
+            opt.textContent = cat.nama;
+            if (cat.id === selectedId) opt.selected = true;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadFields() {
+      const search = document.getElementById('search-input').value.trim();
+      const kota = document.getElementById('kota-input').value.trim();
+      const kategori_id = document.getElementById('kategori-select').value;
+      const tipe = document.querySelector('input[name="tipe-radio"]:checked').value;
+      const min_price = document.getElementById('min-price').value;
+      const max_price = document.getElementById('max-price').value;
+
+      // Construct URLSearchParams
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (kota) params.append('kota', kota);
+      if (kategori_id) params.append('kategori_id', kategori_id);
+      if (tipe) params.append('tipe', tipe);
+      if (min_price) params.append('min_price', min_price);
+      if (max_price) params.append('max_price', max_price);
+
+      App.showLoader();
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/lapangan?${params.toString()}`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          renderFields(res.data);
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function renderFields(fields) {
+      const container = document.getElementById('fields-list-container');
+      const countLabel = document.getElementById('results-count');
+      
+      container.innerHTML = '';
+      countLabel.textContent = `Menemukan ${fields.length} Lapangan`;
+
+      if (fields.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-5 bg-white rounded shadow-sm border">
+            <i class="bi bi-search display-4 text-muted mb-3 d-block"></i>
+            <h4 class="fw-bold text-secondary">Lapangan Tidak Ditemukan</h4>
+            <p class="text-muted">Coba ubah kata kunci pencarian atau sesuaikan filter Anda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      fields.forEach(field => {
+        const rating = field.rating_avg ? parseFloat(field.rating_avg) : 5.0;
+        let starHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starHtml += `<i class="bi ${i <= Math.round(rating) ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}"></i>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        const imageSrc = field.foto ? `${BASE_URL}/uploads/lapangan/${field.foto}` : 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&q=80&w=600';
+        
+        card.innerHTML = `
+          <div class="premium-card h-100 d-flex flex-column bg-white">
+            <div class="position-relative">
+              <img src="${imageSrc}" class="w-100 object-fit-cover" style="height: 200px;" alt="${field.nama}">
+              <span class="position-absolute top-0 end-0 bg-primary text-white badge m-3 px-3 py-2 text-capitalize shadow-sm">${field.tipe}</span>
+            </div>
+            <div class="p-4 d-flex flex-column flex-grow-1">
+              <span class="text-primary fw-semibold small text-uppercase mb-1"><i class="bi bi-tag-fill me-1"></i>${field.nama_kategori}</span>
+              <h5 class="fw-bold mb-2 text-dark text-truncate">${field.nama}</h5>
+              <p class="text-muted small mb-3 text-truncate"><i class="bi bi-geo-alt me-1 text-danger"></i>${field.nama_cabang} - ${field.kota}</p>
+              
+              <div class="d-flex align-items-center mb-3">
+                <div class="me-2">${starHtml}</div>
+                <small class="text-muted">(${field.review_count || 0} Review)</small>
+              </div>
+              
+              <hr class="mt-auto mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted d-block">Harga/Jam</small>
+                  <span class="text-primary fw-bold fs-5">${App.formatRupiah(parseFloat(field.harga_per_jam))}</span>
+                </div>
+                <a href="/customer/detail-lapangan.html?id=${field.id}" class="btn btn-primary rounded btn-sm fw-bold gradient-btn">Detail</a>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function resetFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('kota-input').value = '';
+      document.getElementById('kategori-select').value = '';
+      document.getElementById('tipe-all').checked = true;
+      document.getElementById('min-price').value = '';
+      document.getElementById('max-price').value = '';
+      loadFields();
+    }
+  </script>
+</body>
+</html>

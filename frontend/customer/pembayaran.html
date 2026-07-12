@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran Booking - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-5" style="min-height: 80vh;">
+    <!-- Steps Indicator -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-8 col-lg-6">
+        <div class="checkout-steps">
+          <div class="step-item completed">
+            <div class="step-number">1</div>
+            <div class="small text-muted">Isi Detail</div>
+          </div>
+          <div class="step-item active">
+            <div class="step-number">2</div>
+            <div class="small fw-semibold text-secondary">Pembayaran</div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="small text-muted">Selesai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-8">
+        
+        <!-- Timer Banner -->
+        <div class="alert alert-warning p-3 d-flex align-items-center justify-content-between mb-4 rounded-3 shadow-sm">
+          <div>
+            <i class="bi bi-clock-history fs-4 me-2"></i>
+            <span class="fw-semibold">Selesaikan Pembayaran Sebelum Waktu Habis</span>
+          </div>
+          <h4 class="fw-bold text-danger mb-0" id="countdown-timer">15:00</h4>
+        </div>
+
+        <div class="row g-4">
+          <!-- Left side: transfer instructions -->
+          <div class="col-md-6">
+            <div class="premium-card p-4 bg-white h-100">
+              <h5 class="fw-bold mb-4">Instruksi Pembayaran</h5>
+              
+              <ul class="nav nav-tabs mb-3" id="paymentTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active small fw-bold" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-pane" type="button" role="tab">Transfer Bank</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link small fw-bold" id="qris-tab" data-bs-toggle="tab" data-bs-target="#qris-pane" type="button" role="tab">QRIS</button>
+                </li>
+              </ul>
+              
+              <div class="tab-content" id="paymentTabContent">
+                <!-- Bank transfer -->
+                <div class="tab-pane fade show active py-2" id="bank-pane" role="tabpanel">
+                  <p class="text-muted small">Silakan transfer nominal pas ke rekening resmi partner:</p>
+                  <div class="bg-light p-3 rounded mb-3">
+                    <small class="text-muted d-block">Nama Bank</small>
+                    <strong class="text-dark">Bank Central Asia (BCA)</strong>
+                    
+                    <small class="text-muted d-block mt-2">Nomor Rekening</small>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <strong class="text-primary fs-5" id="rekening-num">123-456-7890</strong>
+                      <button onclick="navigator.clipboard.writeText('1234567890'); App.showToast('Nomor rekening disalin!', 'success')" class="btn btn-sm btn-outline-primary py-0"><i class="bi bi-copy"></i></button>
+                    </div>
+
+                    <small class="text-muted d-block mt-2">Atas Nama Rekening</small>
+                    <strong class="text-dark" id="rekening-owner">ArenaGo Marketplace</strong>
+                  </div>
+                </div>
+
+                <!-- QRIS barcode -->
+                <div class="tab-pane fade text-center py-3" id="qris-pane" role="tabpanel">
+                  <p class="text-muted small mb-2">Scan kode QRIS di bawah ini melalui e-wallet / mobile banking:</p>
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ArenagoMarketplacePaymentCode" class="img-thumbnail" width="180" height="180" alt="QRIS Barcode">
+                  <small class="text-muted d-block mt-2">Merchant: ArenaGo Sports Center</small>
+                </div>
+              </div>
+
+              <hr>
+              
+              <div class="mt-3">
+                <small class="text-muted d-block">Jumlah Nominal Transfer</small>
+                <h3 class="text-primary fw-bold" id="payment-nominal">Rp 0</h3>
+                <small class="text-danger">*Mohon transfer sesuai dengan jumlah di atas agar mudah diverifikasi.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side: receipt upload form -->
+          <div class="col-md-6">
+            <div class="premium-card p-4 bg-white">
+              <h5 class="fw-bold mb-4">Konfirmasi Bukti Transfer</h5>
+              
+              <form id="payment-form">
+                <div class="mb-3">
+                  <label for="metode_pembayaran" class="form-label fw-semibold text-secondary">Metode Pembayaran</label>
+                  <select class="form-select" id="metode_pembayaran" required>
+                    <option value="Transfer Bank" selected>Transfer Bank</option>
+                    <option value="QRIS">QRIS</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="bank" class="form-label fw-semibold text-secondary">Nama Bank Pengirim</label>
+                  <input type="text" class="form-control" id="bank" placeholder="Contoh: BCA / Mandiri / GoPay" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="nama_pengirim" class="form-label fw-semibold text-secondary">Nama Rekening Pengirim</label>
+                  <input type="text" class="form-control" id="nama_pengirim" placeholder="Nama pemegang kartu/akun" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="nomor_referensi" class="form-label fw-semibold text-secondary">Nomor Referensi (Opsional)</label>
+                  <input type="text" class="form-control" id="nomor_referensi" placeholder="10-digit no. referensi transfer">
+                </div>
+
+                <div class="mb-4">
+                  <label for="bukti_pembayaran" class="form-label fw-semibold text-secondary">Unggah Struk Bukti Bayar</label>
+                  <input type="file" class="form-control" id="bukti_pembayaran" accept="image/*" required>
+                  <small class="text-muted">Format file: JPG, PNG. Ukuran maksimal: 5MB.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 gradient-btn fw-bold py-3 rounded">
+                  Kirim Bukti Pembayaran <i class="bi bi-send ms-1"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['customer']);
+    
+    const bookingId = App.getQueryParam('booking_id');
+    let timerInterval = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!bookingId) {
+        window.location.href = '/customer/riwayat.html';
+        return;
+      }
+
+      loadBookingDetails();
+
+      document.getElementById('payment-form').addEventListener('submit', handlePaymentSubmit);
+    });
+
+    async function loadBookingDetails() {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          const { booking } = res.data;
+          
+          document.getElementById('payment-nominal').textContent = App.formatRupiah(parseFloat(booking.total));
+
+          // Set countdown timer
+          startCountdown(booking.expired_at);
+        } else {
+          App.showAlert('Gagal Memuat', 'Data pesanan tidak ditemukan.', 'error').then(() => {
+            window.location.href = '/customer/riwayat.html';
+          });
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function startCountdown(expiredAtStr) {
+      const expiredAt = new Date(expiredAtStr).getTime();
+      const timerLabel = document.getElementById('countdown-timer');
+
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const diff = expiredAt - now;
+
+        if (diff <= 0) {
+          clearInterval(timerInterval);
+          timerLabel.textContent = 'EXPIRED';
+          App.showAlert('Waktu Habis', 'Batas waktu pembayaran pesanan ini telah kedaluwarsa.', 'error').then(() => {
+            window.location.href = '/customer/riwayat.html';
+          });
+          return;
+        }
+
+        const min = Math.floor(diff / (1000 * 60));
+        const sec = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        timerLabel.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+      };
+
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    async function handlePaymentSubmit(e) {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById('bukti_pembayaran');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        App.showAlert('Peringatan', 'Harap lampirkan foto struk bukti bayar.', 'warning');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('bukti_pembayaran', file);
+      formData.append('metode_pembayaran', document.getElementById('metode_pembayaran').value);
+      formData.append('bank', document.getElementById('bank').value.trim());
+      formData.append('nama_pengirim', document.getElementById('nama_pengirim').value.trim());
+      formData.append('nomor_referensi', document.getElementById('nomor_referensi').value.trim());
+
+      App.showConfirm('Unggah Pembayaran', 'Pastikan nominal transfer sudah sesuai sebelum mengirim. Lanjutkan?').then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}/payment`, {
+              method: 'POST',
+              body: formData // files use standard FormData, fetchWithAuth will attach Authorization header
+            });
+            App.hideLoader();
+
+            if (response.ok) {
+              clearInterval(timerInterval);
+              App.showAlert('Bukti Terkirim!', 'Uang transfer Anda sedang dalam verifikasi admin cabang. Cek status berkala di riwayat.', 'success').then(() => {
+                window.location.href = '/customer/riwayat.html';
+              });
+            } else {
+              const resData = await response.json();
+              App.showAlert('Gagal Mengunggah', resData.message || 'Gagal menyimpan bukti pembayaran.', 'error');
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+            App.showAlert('Error', 'Gagal memproses unggah berkas.', 'error');
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

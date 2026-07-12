@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Cabang - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark" id="branch-title-label">Jadwal Operasional Cabang</h1>
+          <p class="text-muted">Kelola status bermain customer secara manual langsung dari kasir/operator.</p>
+        </div>
+      </div>
+
+      <!-- Filters Panel -->
+      <div class="premium-card p-3 bg-white mb-4 shadow-sm">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="schedule-date" class="form-label fw-bold text-secondary small">Pilih Tanggal</label>
+            <input type="date" class="form-control" id="schedule-date">
+          </div>
+          <div class="col-md-4">
+            <label for="schedule-field" class="form-label fw-bold text-secondary small">Filter Lapangan</label>
+            <select class="form-select" id="schedule-field" onchange="loadBranchSchedules()">
+              <option value="">Semua Lapangan</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <button onclick="loadBranchSchedules()" class="btn btn-primary w-100 py-2 fw-bold gradient-btn"><i class="bi bi-arrow-clockwise"></i> Segarkan Jadwal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Timeline Grid -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle text-center small">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 140px;">Waktu Slot</th>
+                <th>Lapangan</th>
+                <th>Penyewa / Customer</th>
+                <th>Status Sewa</th>
+                <th style="width: 200px;">Aksi Cepat</th>
+              </tr>
+            </thead>
+            <tbody id="schedules-timeline-body">
+              <tr>
+                <td colspan="5" class="text-center text-muted">Memuat lini masa jadwal operasional...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['staff_cabang', 'mitra']);
+
+    let assignedCabangId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set date input to today
+      const dateInput = document.getElementById('schedule-date');
+      dateInput.value = new Date().toISOString().split('T')[0];
+      
+      dateInput.addEventListener('change', loadBranchSchedules);
+
+      loadStaffProfile();
+    });
+
+    async function loadStaffProfile() {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/auth/profile`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          const { staffProfile } = res.data;
+
+          if (staffProfile) {
+            assignedCabangId = staffProfile.cabang_id;
+            document.getElementById('branch-title-label').textContent = `Jadwal Operasional - ${staffProfile.nama_cabang}`;
+            
+            loadFieldsDropdown(staffProfile.cabang_id);
+            loadBranchSchedules();
+          } else {
+            document.getElementById('branch-title-label').textContent = 'Akses Terbatas';
+            document.getElementById('schedules-timeline-body').innerHTML = `<tr><td colspan="5" class="text-center text-danger">Anda belum ditugaskan ke cabang manapun.</td></tr>`;
+          }
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function loadFieldsDropdown(cabangId) {
+      try {
+        // Query fields of this cabang
+        const response = await fetch(`${BASE_URL}/api/v1/lapangan?cabang_id=${cabangId}`);
+        if (response.ok) {
+          const res = await response.json();
+          const select = document.getElementById('schedule-field');
+          res.data.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = f.nama;
+            select.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadBranchSchedules() {
+      if (!assignedCabangId) return;
+
+      const dateStr = document.getElementById('schedule-date').value;
+      const fieldId = document.getElementById('schedule-field').value;
+
+      const params = new URLSearchParams();
+      params.append('cabang_id', assignedCabangId);
+      params.append('tanggal', dateStr);
+      if (fieldId) params.append('lapangan_id', fieldId);
+
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking?${params.toString()}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTimeline(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTimeline(bookings) {
+      const tbody = document.getElementById('schedules-timeline-body');
+      tbody.innerHTML = '';
+
+      if (bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-calendar-x d-block fs-3 mb-2"></i>Tidak ada pemesanan jadwal sewa pada tanggal ini.</td></tr>`;
+        return;
+      }
+
+      // Sort bookings by hour start
+      bookings.sort((a,b) => a.jam_mulai.localeCompare(b.jam_mulai) || a.nama_lapangan.localeCompare(b.nama_lapangan));
+
+      bookings.forEach(b => {
+        const row = document.createElement('tr');
+        
+        let actionBtn = '';
+        if (b.status === 'approved') {
+          actionBtn = `<button onclick="triggerQuickStatus('${b.id}', 'checked_in')" class="btn btn-sm btn-success rounded fw-bold w-100 py-1"><i class="bi bi-check-circle"></i> Check-In</button>`;
+        } else if (b.status === 'checked_in') {
+          actionBtn = `<button onclick="triggerQuickStatus('${b.id}', 'playing')" class="btn btn-sm btn-primary rounded fw-bold w-100 py-1"><i class="bi bi-play-fill"></i> Mulai Main</button>`;
+        } else if (b.status === 'playing') {
+          actionBtn = `<button onclick="triggerQuickStatus('${b.id}', 'completed')" class="btn btn-sm btn-outline-success rounded fw-bold w-100 py-1"><i class="bi bi-check-lg"></i> Selesaikan</button>`;
+        } else {
+          actionBtn = `<span class="text-muted small">Tidak Ada Aksi</span>`;
+        }
+
+        row.innerHTML = `
+          <td><strong class="text-dark">${b.jam_mulai.slice(0, 5)} - ${b.jam_selesai.slice(0, 5)}</strong></td>
+          <td><span class="badge bg-secondary-subtle text-secondary">${b.nama_lapangan}</span></td>
+          <td class="text-start">
+            <strong>${b.nama_user}</strong>
+            <div class="text-muted" style="font-size: 11px;">HP: ${b.no_hp_user || '-'} | Code: ${b.kode_booking}</div>
+          </td>
+          <td>
+            <span class="badge-status ${b.status}">${b.status.replace('_', ' ')}</span>
+          </td>
+          <td>${actionBtn}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function triggerQuickStatus(bookingId, nextStatus) {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: nextStatus, catatan: `Status diperbarui langsung oleh staff operator.` })
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          App.showToast(`Status booking berhasil diubah menjadi ${nextStatus}`, 'success');
+          loadBranchSchedules();
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal', res.message || 'Gagal mengubah status sewa.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

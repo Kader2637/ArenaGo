@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Staff Cabang - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark" id="branch-title-label">Dashboard Operator Cabang</h1>
+          <p class="text-muted" id="branch-addr-label">Memuat informasi cabang ditugaskan...</p>
+        </div>
+        <a href="/staff/checkin.html" class="btn btn-primary rounded fw-bold gradient-btn py-2 px-3"><i class="bi bi-qr-code-scan me-1"></i> Scan QR Check-In</a>
+      </div>
+
+      <!-- Quick stats indicators -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Booking Hari Ini</small>
+            <h2 class="fw-bold text-primary mb-0" id="stat-today">0</h2>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Sudah Check-In</small>
+            <h2 class="fw-bold text-success mb-0" id="stat-checkin">0</h2>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Sedang Bermain</small>
+            <h2 class="fw-bold text-primary mb-0" id="stat-playing">0</h2>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Menunggu Check-In</small>
+            <h2 class="fw-bold text-warning mb-0" id="stat-waiting">0</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Daily Schedule listings -->
+        <div class="col-lg-7">
+          <div class="premium-card p-4 bg-white shadow-sm h-100">
+            <h5 class="fw-bold mb-3">Jadwal Bermain Hari Ini</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle small">
+                <thead class="table-light">
+                  <tr>
+                    <th>Jam</th>
+                    <th>Lapangan</th>
+                    <th>Penyewa</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="today-bookings-table">
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">Belum ada penyewaan terjadwal hari ini.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Checkin Logs -->
+        <div class="col-lg-5">
+          <div class="premium-card p-4 bg-white shadow-sm h-100">
+            <h5 class="fw-bold mb-3">Histori Log Check-In Terakhir</h5>
+            <div class="list-group list-group-flush" id="checkin-logs-list">
+              <p class="text-muted small">Belum ada riwayat check-in pembooking di cabang ini.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['staff_cabang']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStaffProfile();
+    });
+
+    async function loadStaffProfile() {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/auth/profile`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          const { staffProfile } = res.data;
+          
+          if (staffProfile) {
+            document.getElementById('branch-title-label').textContent = `Dashboard Operator - ${staffProfile.nama_cabang}`;
+            document.getElementById('branch-addr-label').textContent = `${staffProfile.alamat_cabang}, ${staffProfile.kota_cabang}`;
+            
+            // Query stats for staff's specific cabang
+            loadStaffDashboardData(staffProfile.cabang_id);
+          } else {
+            document.getElementById('branch-title-label').textContent = 'Staff Belum Ditugaskan';
+            document.getElementById('branch-addr-label').textContent = 'Silakan hubungi Mitra/Owner untuk menugaskan Anda ke suatu cabang.';
+          }
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function loadStaffDashboardData(cabangId) {
+      try {
+        // Query completed bookings for staff cabang
+        // Using standard API with filters
+        const todayStr = new Date().toISOString().split('T')[0];
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking?cabang_id=${cabangId}&tanggal=${todayStr}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTodayBookings(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTodayBookings(bookings) {
+      let todayCount = bookings.length;
+      let checkedInCount = bookings.filter(b => b.status === 'checked_in').length;
+      let playingCount = bookings.filter(b => b.status === 'playing').length;
+      let waitingCount = bookings.filter(b => b.status === 'approved').length;
+
+      document.getElementById('stat-today').textContent = todayCount;
+      document.getElementById('stat-checkin').textContent = checkedInCount;
+      document.getElementById('stat-playing').textContent = playingCount;
+      document.getElementById('stat-waiting').textContent = waitingCount;
+
+      const tbody = document.getElementById('today-bookings-table');
+      tbody.innerHTML = '';
+
+      if (bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada penyewaan terjadwal hari ini.</td></tr>`;
+        return;
+      }
+
+      // Sort bookings by hour start
+      bookings.sort((a,b) => a.jam_mulai.localeCompare(b.jam_mulai));
+
+      bookings.forEach(b => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${b.jam_mulai.slice(0, 5)} - ${b.jam_selesai.slice(0, 5)}</strong></td>
+          <td><small>${b.nama_lapangan}</small></td>
+          <td><small class="fw-semibold">${b.nama_user}</small></td>
+          <td><span class="badge-status ${b.status}">${b.status.replace('_', ' ')}</span></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Render simulated audit checkins list
+      const checkinList = document.getElementById('checkin-logs-list');
+      checkinList.innerHTML = '';
+      
+      const loggedCheckins = bookings.filter(b => ['checked_in', 'playing', 'completed'].includes(b.status));
+      if (loggedCheckins.length === 0) {
+        checkinList.innerHTML = `<p class="text-muted small">Belum ada riwayat check-in log hari ini.</p>`;
+        return;
+      }
+
+      loggedCheckins.forEach(lc => {
+        const div = document.createElement('div');
+        div.className = 'py-2 border-bottom';
+        div.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <strong class="text-dark small">${lc.nama_user}</strong>
+            <span class="badge bg-success" style="font-size: 10px;">Check In</span>
+          </div>
+          <small class="text-muted d-block" style="font-size: 11px;"><i class="bi bi-tag-fill me-1 text-primary"></i> ${lc.kode_booking} - Lap: ${lc.nama_lapangan}</small>
+        `;
+        checkinList.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>

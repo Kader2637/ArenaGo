@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Cabang - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Cabang / Lokasi</h1>
+          <p class="text-muted">Kelola cabang arena olahraga Anda, jam operasional, dan tugaskan staff pengelola.</p>
+        </div>
+        <button class="btn btn-primary rounded fw-bold gradient-btn" onclick="openAddBranchModal()"><i class="bi bi-plus-lg"></i> Tambah Cabang</button>
+      </div>
+
+      <!-- Branches Table -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nama Cabang</th>
+              <th>Kota</th>
+              <th>Alamat</th>
+              <th>Telepon</th>
+              <th>Status</th>
+              <th class="text-end">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="branch-table-body">
+            <tr>
+              <td colspan="6" class="text-center text-muted">Memuat data cabang...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Branch Modal Popup -->
+  <div class="modal fade" id="branchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0" id="branch-modal-title">Tambah Cabang Arena</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="branch-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="branch-id">
+
+            <div class="mb-3">
+              <label for="branch-nama" class="form-label fw-bold text-secondary">Nama Cabang</label>
+              <input type="text" class="form-control" id="branch-nama" placeholder="Contoh: Ijen Sport Center" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="branch-kota" class="form-label fw-bold text-secondary">Kota Lokasi</label>
+              <input type="text" class="form-control" id="branch-kota" placeholder="Contoh: Malang" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="branch-telepon" class="form-label fw-bold text-secondary">Nomor Telepon Cabang</label>
+              <input type="text" class="form-control" id="branch-telepon" placeholder="Contoh: 08123456789">
+            </div>
+
+            <div class="mb-3">
+              <label for="branch-maps" class="form-label fw-bold text-secondary">URL Google Maps Iframe / Link</label>
+              <input type="url" class="form-control" id="branch-maps" placeholder="https://goo.gl/maps/...">
+            </div>
+
+            <div class="mb-3">
+              <label for="branch-alamat" class="form-label fw-bold text-secondary">Alamat Fisik Lengkap</label>
+              <textarea class="form-control" id="branch-alamat" rows="2" placeholder="Tulis nama jalan, RT/RW, kecamatan..." required></textarea>
+            </div>
+
+            <div class="mb-2" id="status-row">
+              <label for="branch-status" class="form-label fw-bold text-secondary">Status Operasional</label>
+              <select class="form-select" id="branch-status">
+                <option value="aktif" selected>Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Branch Hours Modal Popup -->
+  <div class="modal fade" id="hoursModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Ubah Jam Operasional</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="hours-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="hours-branch-id">
+            <p class="text-muted small mb-3">Tentukan jam operasional buka dan tutup lapangan berdasarkan hari.</p>
+            
+            <div id="days-container" class="d-flex flex-column gap-3">
+              <!-- Render 7 days dyn -->
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Simpan Jadwal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Branch Staff Modal Popup -->
+  <div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Kelola Staff Cabang</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="staff-branch-id">
+          
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-secondary">Tugaskan Staff Baru (Dengan Email)</label>
+            <form id="add-staff-form" class="input-group">
+              <input type="email" class="form-control" id="staff-email-input" placeholder="staff@email.com" required>
+              <button class="btn btn-primary fw-bold" type="submit">Tambahkan</button>
+            </form>
+            <small class="text-muted">Pastikan staff sudah mendaftar akun ArenaGo dengan peran Staff Cabang.</small>
+          </div>
+
+          <hr>
+          
+          <h6 class="fw-bold mb-2">Daftar Staff Ditugaskan:</h6>
+          <div class="list-group" id="staff-list-container">
+            <div class="text-muted small">Belum ada staff ditugaskan di cabang ini.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['mitra']);
+
+    let branchModalObj = null;
+    let hoursModalObj = null;
+    let staffModalObj = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      branchModalObj = new bootstrap.Modal(document.getElementById('branchModal'));
+      hoursModalObj = new bootstrap.Modal(document.getElementById('hoursModal'));
+      staffModalObj = new bootstrap.Modal(document.getElementById('staffModal'));
+
+      loadBranchesTable();
+
+      document.getElementById('branch-form').addEventListener('submit', handleBranchSubmit);
+      document.getElementById('hours-form').addEventListener('submit', handleHoursSubmit);
+      document.getElementById('add-staff-form').addEventListener('submit', handleAddStaffSubmit);
+    });
+
+    async function loadBranchesTable() {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTable(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTable(branches) {
+      const tbody = document.getElementById('branch-table-body');
+      tbody.innerHTML = '';
+
+      if (branches.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Belum ada cabang terdaftar. Klik tombol Tambah untuk membuat baru.</td></tr>`;
+        return;
+      }
+
+      branches.forEach(b => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong class="text-dark">${b.nama}</strong></td>
+          <td><small class="text-secondary">${b.kota}</small></td>
+          <td><small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">${b.alamat}</small></td>
+          <td><small class="text-secondary">${b.telepon || '-'}</small></td>
+          <td>
+            <span class="badge ${b.status === 'aktif' ? 'bg-success' : 'bg-danger'}">${b.status}</span>
+          </td>
+          <td class="text-end">
+            <button onclick="openStaffModal('${b.id}')" class="btn btn-sm btn-outline-info rounded me-1" title="Kelola Staff"><i class="bi bi-people"></i> Staff</button>
+            <button onclick="openHoursModal('${b.id}')" class="btn btn-sm btn-outline-warning rounded me-1" title="Jam Operasional"><i class="bi bi-clock"></i> Jam</button>
+            <button onclick="openEditBranchModal('${b.id}', '${b.nama}', '${b.kota}', '${b.telepon}', '${b.maps}', '${b.alamat}', '${b.status}')" class="btn btn-sm btn-outline-primary rounded me-1" title="Ubah"><i class="bi bi-pencil"></i></button>
+            <button onclick="deleteCabang('${b.id}', '${b.nama}')" class="btn btn-sm btn-outline-danger rounded" title="Hapus"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function openAddBranchModal() {
+      document.getElementById('branch-modal-title').textContent = 'Tambah Cabang Arena';
+      document.getElementById('branch-id').value = '';
+      document.getElementById('branch-nama').value = '';
+      document.getElementById('branch-kota').value = '';
+      document.getElementById('branch-telepon').value = '';
+      document.getElementById('branch-maps').value = '';
+      document.getElementById('branch-alamat').value = '';
+      document.getElementById('status-row').classList.add('d-none');
+      
+      branchModalObj.show();
+    }
+
+    function openEditBranchModal(id, nama, kota, telepon, maps, alamat, status) {
+      document.getElementById('branch-modal-title').textContent = 'Ubah Cabang Arena';
+      document.getElementById('branch-id').value = id;
+      document.getElementById('branch-nama').value = nama;
+      document.getElementById('branch-kota').value = kota;
+      document.getElementById('branch-telepon').value = telepon === 'null' ? '' : telepon;
+      document.getElementById('branch-maps').value = maps === 'null' ? '' : maps;
+      document.getElementById('branch-alamat').value = alamat;
+      document.getElementById('branch-status').value = status;
+      document.getElementById('status-row').classList.remove('d-none');
+      
+      branchModalObj.show();
+    }
+
+    async function handleBranchSubmit(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('branch-id').value;
+      const payload = {
+        nama: document.getElementById('branch-nama').value.trim(),
+        kota: document.getElementById('branch-kota').value.trim(),
+        telepon: document.getElementById('branch-telepon').value.trim(),
+        maps: document.getElementById('branch-maps').value.trim(),
+        alamat: document.getElementById('branch-alamat').value.trim(),
+      };
+
+      if (id) {
+        payload.status = document.getElementById('branch-status').value;
+      }
+
+      App.showLoader();
+      try {
+        let response;
+        if (id) {
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+        App.hideLoader();
+
+        if (response.ok) {
+          branchModalObj.hide();
+          App.showToast('Data cabang berhasil disimpan', 'success');
+          loadBranchesTable();
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal Menyimpan', res.message || 'Gagal menyimpan cabang.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function deleteCabang(id, nama) {
+      App.showConfirm('Hapus Cabang', `Apakah Anda yakin ingin menghapus cabang ${nama}? Semua lapangan didalamnya juga akan dinonaktifkan.`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${id}`, {
+              method: 'DELETE'
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Cabang berhasil dihapus', 'success');
+              loadBranchesTable();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    // Operating Hours manager
+    async function openHoursModal(cabangId) {
+      document.getElementById('hours-branch-id').value = cabangId;
+      const container = document.getElementById('days-container');
+      container.innerHTML = `<div class="text-center"><div class="spinner-border text-primary"></div></div>`;
+      
+      hoursModalObj.show();
+
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${cabangId}/jam-operasional`);
+        if (response.ok) {
+          const res = await response.json();
+          renderHoursForm(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderHoursForm(hoursList) {
+      const container = document.getElementById('days-container');
+      container.innerHTML = '';
+
+      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      
+      for (let i = 0; i <= 6; i++) {
+        // Find existing record
+        const record = hoursList.find(h => h.hari === i) || { jam_buka: '07:00:00', jam_tutup: '22:00:00', status: 'aktif' };
+        
+        const row = document.createElement('div');
+        row.className = 'row g-2 align-items-center border-bottom pb-2';
+        
+        row.innerHTML = `
+          <div class="col-3">
+            <strong class="small text-secondary">${dayNames[i]}</strong>
+            <input type="hidden" name="day-hari" value="${i}">
+          </div>
+          <div class="col-3">
+            <input type="time" name="day-buka" class="form-control form-control-sm" value="${record.jam_buka.slice(0, 5)}">
+          </div>
+          <div class="col-3">
+            <input type="time" name="day-tutup" class="form-control form-control-sm" value="${record.jam_tutup.slice(0, 5)}">
+          </div>
+          <div class="col-3">
+            <select name="day-status" class="form-select form-select-sm">
+              <option value="aktif" ${record.status === 'aktif' ? 'selected' : ''}>Buka</option>
+              <option value="nonaktif" ${record.status === 'nonaktif' ? 'selected' : ''}>Tutup</option>
+            </select>
+          </div>
+        `;
+        container.appendChild(row);
+      }
+    }
+
+    async function handleHoursSubmit(e) {
+      e.preventDefault();
+      
+      const cabangId = document.getElementById('hours-branch-id').value;
+      const rows = document.getElementById('days-container').children;
+      const payload = [];
+
+      for (const row of rows) {
+        const hari = row.querySelector('[name="day-hari"]').value;
+        const jam_buka = row.querySelector('[name="day-buka"]').value + ':00';
+        const jam_tutup = row.querySelector('[name="day-tutup"]').value + ':00';
+        const status = row.querySelector('[name="day-status"]').value;
+
+        payload.push({ hari: parseInt(hari), jam_buka, jam_tutup, status });
+      }
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${cabangId}/jam-operasional`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jam_operasional: payload })
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          hoursModalObj.hide();
+          App.showToast('Jam operasional berhasil diperbarui', 'success');
+        } else {
+          App.showAlert('Gagal Menyimpan', 'Jadwal operasional gagal diproses.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    // Staff manager
+    async function openStaffModal(cabangId) {
+      document.getElementById('staff-branch-id').value = cabangId;
+      document.getElementById('staff-email-input').value = '';
+      loadStaffList(cabangId);
+      staffModalObj.show();
+    }
+
+    async function loadStaffList(cabangId) {
+      const container = document.getElementById('staff-list-container');
+      container.innerHTML = `<div class="text-center py-2"><div class="spinner-border text-primary spinner-border-sm"></div></div>`;
+
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${cabangId}/staff`);
+        if (response.ok) {
+          const res = await response.json();
+          renderStaff(res.data, cabangId);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderStaff(staffList, cabangId) {
+      const container = document.getElementById('staff-list-container');
+      container.innerHTML = '';
+
+      if (staffList.length === 0) {
+        container.innerHTML = `<div class="text-muted small p-2 bg-light rounded">Belum ada staff ditugaskan di cabang ini.</div>`;
+        return;
+      }
+
+      staffList.forEach(st => {
+        const div = document.createElement('div');
+        div.className = 'list-group-item d-flex justify-content-between align-items-center py-2 border rounded mb-2 bg-white';
+        div.innerHTML = `
+          <div>
+            <strong class="text-dark small">${st.nama}</strong>
+            <small class="text-muted d-block" style="font-size: 11px;">${st.email} | HP: ${st.no_hp || '-'}</small>
+          </div>
+          <button onclick="removeStaffFromCabang('${cabangId}', '${st.user_id}', '${st.nama}')" class="btn btn-sm btn-outline-danger py-1" title="Keluarkan Staff"><i class="bi bi-trash"></i></button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function handleAddStaffSubmit(e) {
+      e.preventDefault();
+      
+      const cabangId = document.getElementById('staff-branch-id').value;
+      const email = document.getElementById('staff-email-input').value.trim();
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${cabangId}/staff`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email_staff: email })
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          document.getElementById('staff-email-input').value = '';
+          App.showToast('Staff berhasil ditugaskan', 'success');
+          loadStaffList(cabangId);
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal Menugaskan', res.message || 'Gagal menambahkan staff.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function removeStaffFromCabang(cabangId, userId, name) {
+      App.showConfirm('Keluarkan Staff', `Keluarkan staff ${name} dari cabang ini?`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/cabang/${cabangId}/staff/remove`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ staff_user_id: userId })
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Staff berhasil dikeluarkan', 'success');
+              loadStaffList(cabangId);
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

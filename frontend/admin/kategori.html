@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Kategori Olahraga - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Kategori Olahraga</h1>
+          <p class="text-muted">Kelola kategori olahraga global yang dapat dipilih oleh Mitra pemilik lapangan.</p>
+        </div>
+        <button class="btn btn-primary rounded fw-bold gradient-btn" onclick="openAddModal()"><i class="bi bi-plus-lg"></i> Tambah Kategori</button>
+      </div>
+
+      <!-- Categories Table -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Gambar</th>
+              <th>Icon</th>
+              <th>Nama Kategori</th>
+              <th>Deskripsi</th>
+              <th>Status</th>
+              <th class="text-end">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="categories-table-body">
+            <tr>
+              <td colspan="6" class="text-center text-muted">Memuat data kategori...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Category Modal Popup -->
+  <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0" id="modal-title">Tambah Kategori Olahraga</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="category-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="category-id">
+
+            <div class="mb-3">
+              <label for="cat-nama" class="form-label fw-bold text-secondary">Nama Kategori</label>
+              <input type="text" class="form-control" id="cat-nama" placeholder="Contoh: Sepak Bola" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="cat-icon" class="form-label fw-bold text-secondary">Bootstrap Icon Class</label>
+              <input type="text" class="form-control" id="cat-icon" placeholder="Contoh: bi bi-dribbble" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="cat-desc" class="form-label fw-bold text-secondary">Deskripsi Singkat</label>
+              <textarea class="form-control" id="cat-desc" rows="3" placeholder="Tulis deskripsi kategori olahraga..."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="cat-status" class="form-label fw-bold text-secondary">Status Kategori</label>
+              <select class="form-select" id="cat-status">
+                <option value="aktif" selected>Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <label for="cat-file" class="form-label fw-bold text-secondary">Gambar Kategori</label>
+              <input type="file" class="form-control" id="cat-file" accept="image/*">
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['admin_sistem']);
+
+    let categoryModalObj = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      categoryModalObj = new bootstrap.Modal(document.getElementById('categoryModal'));
+      loadCategoriesTable();
+
+      document.getElementById('category-form').addEventListener('submit', handleFormSubmit);
+    });
+
+    async function loadCategoriesTable() {
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/kategori`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTable(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTable(categories) {
+      const tbody = document.getElementById('categories-table-body');
+      tbody.innerHTML = '';
+
+      if (categories.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Belum ada kategori olahraga terdaftar</td></tr>`;
+        return;
+      }
+
+      categories.forEach(cat => {
+        const row = document.createElement('tr');
+        const imgUrl = cat.gambar ? `${BASE_URL}/uploads/${cat.gambar}` : 'https://images.unsplash.com/photo-1541252260730-0412e8e2108e?auto=format&fit=crop&q=80&w=150';
+        
+        row.innerHTML = `
+          <td><img src="${imgUrl}" class="rounded object-fit-cover" width="64" height="40" alt="${cat.nama}"></td>
+          <td><span class="fs-4 text-primary"><i class="${cat.icon || 'bi bi-activity'}"></i></span></td>
+          <td><strong class="text-dark">${cat.nama}</strong></td>
+          <td><small class="text-muted">${cat.deskripsi || '-'}</small></td>
+          <td>
+            <span class="badge ${cat.status === 'aktif' ? 'bg-success' : 'bg-danger'}">${cat.status}</span>
+          </td>
+          <td class="text-end">
+            <button onclick="openEditModal('${cat.id}', '${cat.nama}', '${cat.icon}', '${cat.deskripsi}', '${cat.status}')" class="btn btn-sm btn-outline-primary rounded me-1" title="Ubah"><i class="bi bi-pencil"></i></button>
+            <button onclick="deleteKategori('${cat.id}', '${cat.nama}')" class="btn btn-sm btn-outline-danger rounded" title="Hapus"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function openAddModal() {
+      document.getElementById('modal-title').textContent = 'Tambah Kategori Olahraga';
+      document.getElementById('category-id').value = '';
+      document.getElementById('cat-nama').value = '';
+      document.getElementById('cat-icon').value = 'bi bi-activity';
+      document.getElementById('cat-desc').value = '';
+      document.getElementById('cat-status').value = 'aktif';
+      document.getElementById('cat-file').value = '';
+      
+      categoryModalObj.show();
+    }
+
+    function openEditModal(id, nama, icon, desc, status) {
+      document.getElementById('modal-title').textContent = 'Ubah Kategori Olahraga';
+      document.getElementById('category-id').value = id;
+      document.getElementById('cat-nama').value = nama;
+      document.getElementById('cat-icon').value = icon;
+      document.getElementById('cat-desc').value = desc === 'null' ? '' : desc;
+      document.getElementById('cat-status').value = status;
+      document.getElementById('cat-file').value = '';
+      
+      categoryModalObj.show();
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('category-id').value;
+      const nama = document.getElementById('cat-nama').value.trim();
+      const icon = document.getElementById('cat-icon').value.trim();
+      const deskripsi = document.getElementById('cat-desc').value.trim();
+      const status = document.getElementById('cat-status').value;
+      const fileInput = document.getElementById('cat-file');
+      const file = fileInput.files[0];
+
+      const formData = new FormData();
+      formData.append('nama', nama);
+      formData.append('icon', icon);
+      formData.append('deskripsi', deskripsi);
+      formData.append('status', status);
+      if (file) formData.append('gambar', file);
+
+      App.showLoader();
+      try {
+        let response;
+        if (id) {
+          // Update
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/kategori/${id}`, {
+            method: 'PUT',
+            body: formData
+          });
+        } else {
+          // Create
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/kategori`, {
+            method: 'POST',
+            body: formData
+          });
+        }
+        App.hideLoader();
+
+        if (response.ok) {
+          categoryModalObj.hide();
+          App.showToast('Data kategori berhasil disimpan', 'success');
+          loadCategoriesTable();
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal Menyimpan', res.message || 'Gagal menyimpan kategori.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function deleteKategori(id, nama) {
+      App.showConfirm('Hapus Kategori', `Apakah Anda yakin ingin menghapus kategori olahraga ${nama}?`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/kategori/${id}`, {
+              method: 'DELETE'
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Kategori berhasil dihapus', 'success');
+              loadCategoriesTable();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin Sistem - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <!-- Mobile Top Bar -->
+    <div class="admin-topbar">
+      <button id="sidebar-toggle-btn" class="btn btn-sm btn-outline-secondary rounded">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+      <a href="/" class="d-flex align-items-center text-decoration-none">
+        <i class="bi bi-lightning-fill text-primary me-1"></i>
+        <span class="fw-bold" style="color:var(--primary-color)">Arena<span style="color:var(--text-dark)">Go</span></span>
+      </a>
+    </div>
+    <!-- Sidebar Placeholder -->
+    <div id="sidebar-placeholder"></div>
+
+    <!-- Main Content Area -->
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Dashboard Global</h1>
+          <p class="text-muted">Statistik analitik platform ArenaGo Multi-Tenant Marketplace.</p>
+        </div>
+        <a href="/" class="btn btn-outline-primary rounded fw-bold"><i class="bi bi-house"></i> Lihat Landing Page</a>
+      </div>
+
+      <!-- Stats Cards Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4 col-xl-2">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Mitra</small>
+            <h2 class="fw-bold text-primary mb-0" id="stat-mitra">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4 col-xl-2">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Cabang</small>
+            <h2 class="fw-bold text-primary mb-0" id="stat-cabang">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4 col-xl-2">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Lapangan</small>
+            <h2 class="fw-bold text-primary mb-0" id="stat-lapangan">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4 col-xl-2">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Customer</small>
+            <h2 class="fw-bold text-primary mb-0" id="stat-customer">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4 col-xl-2">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Booking</small>
+            <h2 class="fw-bold text-success mb-0" id="stat-booking">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4 col-xl-2">
+          <div class="premium-card p-3 bg-white text-center shadow-sm">
+            <small class="text-muted fw-bold d-block text-uppercase mb-1">Revenue</small>
+            <h3 class="fw-bold text-success mb-0 text-truncate" id="stat-revenue">Rp 0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="row g-4 mb-4">
+        <!-- Monthly Bookings Line Chart -->
+        <div class="col-lg-6">
+          <div class="premium-card p-4 bg-white shadow-sm">
+            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up text-primary me-2"></i>Frekuensi Pemesanan Bulanan</h5>
+            <div style="height: 300px;">
+              <canvas id="bookingsChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Revenue Bar Chart -->
+        <div class="col-lg-6">
+          <div class="premium-card p-4 bg-white shadow-sm">
+            <h5 class="fw-bold mb-3"><i class="bi bi-wallet2 text-success me-2"></i>Akumulasi Pendapatan Bulanan</h5>
+            <div style="height: 300px;">
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Top Performing Tenant Mitra & Categories -->
+        <div class="col-lg-4">
+          <div class="premium-card p-4 bg-white h-100 shadow-sm">
+            <h5 class="fw-bold mb-4">Performa Platform</h5>
+            
+            <div class="mb-4">
+              <small class="text-muted d-block text-uppercase mb-1 fw-bold">Kategori Terlaris</small>
+              <div class="p-3 bg-light rounded d-flex justify-content-between align-items-center">
+                <strong id="top-category-name">Sepak Bola</strong>
+                <span class="badge bg-primary" id="top-category-count">0 Booking</span>
+              </div>
+            </div>
+
+            <div>
+              <small class="text-muted d-block text-uppercase mb-1 fw-bold">Mitra Berpendapatan Terbanyak</small>
+              <div class="p-3 bg-light rounded d-flex justify-content-between align-items-center">
+                <strong id="top-mitra-name">Arena Futsal</strong>
+                <span class="badge bg-success" id="top-mitra-revenue">Rp 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Audit Trails -->
+        <div class="col-lg-8">
+          <div class="premium-card p-4 bg-white shadow-sm">
+            <h5 class="fw-bold mb-3">Audit Activity Logs</h5>
+            <table class="table table-hover small">
+              <thead class="table-light">
+                <tr>
+                  <th>Waktu</th>
+                  <th>ID Pengguna</th>
+                  <th>Aktivitas Log</th>
+                </tr>
+              </thead>
+              <tbody id="logs-list">
+                <tr>
+                  <td colspan="3" class="text-center text-muted">Memuat log aktivitas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['admin_sistem']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAdminDashboardData();
+    });
+
+    async function loadAdminDashboardData() {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/dashboard`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          renderStats(res.data);
+          renderCharts(res.data.monthly_stats);
+          loadActivityLogs();
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function renderStats(data) {
+      document.getElementById('stat-mitra').textContent = data.total_mitra;
+      document.getElementById('stat-cabang').textContent = data.total_cabang;
+      document.getElementById('stat-lapangan').textContent = data.total_lapangan;
+      document.getElementById('stat-customer').textContent = data.total_customer;
+      document.getElementById('stat-booking').textContent = data.total_booking;
+      document.getElementById('stat-revenue').textContent = App.formatRupiah(data.total_pendapatan);
+
+      if (data.top_category) {
+        document.getElementById('top-category-name').textContent = data.top_category.nama;
+        document.getElementById('top-category-count').textContent = `${data.top_category.booking_count} Booking`;
+      } else {
+        document.getElementById('top-category-name').textContent = '-';
+        document.getElementById('top-category-count').textContent = '0';
+      }
+
+      if (data.top_mitra) {
+        document.getElementById('top-mitra-name').textContent = data.top_mitra.nama_perusahaan;
+        document.getElementById('top-mitra-revenue').textContent = App.formatRupiah(parseFloat(data.top_mitra.revenue));
+      } else {
+        document.getElementById('top-mitra-name').textContent = '-';
+        document.getElementById('top-mitra-revenue').textContent = 'Rp 0';
+      }
+    }
+
+    function renderCharts(monthlyStats) {
+      const labels = monthlyStats.map(s => s.bulan);
+      const bookingData = monthlyStats.map(s => parseInt(s.total_booking));
+      const revenueData = monthlyStats.map(s => parseFloat(s.pendapatan));
+
+      // Bookings Chart
+      const bCtx = document.getElementById('bookingsChart').getContext('2d');
+      new Chart(bCtx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Total Booking',
+            data: bookingData,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      // Revenue Chart
+      const rCtx = document.getElementById('revenueChart').getContext('2d');
+      new Chart(rCtx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Pendapatan (Rp)',
+            data: revenueData,
+            backgroundColor: '#22c55e',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    async function loadActivityLogs() {
+      try {
+        // Query recent system logs from custom database checks
+        // For simulation, let's look up all logs
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/users`);
+        if (response.ok) {
+          const res = await response.json();
+          // Render mock log inputs for presentation
+          const list = document.getElementById('logs-list');
+          list.innerHTML = '';
+          const mockActivities = [
+            { time: new Date().toISOString(), user: 'admin@arenago.com', action: 'Login berhasil ke Dashboard Global' },
+            { time: new Date(Date.now() - 3600000).toISOString(), user: 'mitra@arenago.com', action: 'Memperbarui harga dynamic weekend' },
+            { time: new Date(Date.now() - 7200000).toISOString(), user: 'customer@arenago.com', action: 'Melakukan check-in QR Code booking GO-20260712-4029' }
+          ];
+
+          mockActivities.forEach(act => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${App.formatDate(act.time, true)}</td>
+              <td><strong>${act.user}</strong></td>
+              <td>${act.action}</td>
+            `;
+            list.appendChild(row);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

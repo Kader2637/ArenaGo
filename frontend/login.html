@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk ke ArenaGo - Sports Field Booking Marketplace</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center min-vh-100 py-5">
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="text-center mb-4">
+          <a href="/" class="d-inline-flex align-items-center text-primary fw-bold fs-2 text-decoration-none">
+            <i class="bi bi-lightning-fill me-2"></i>Arena<span class="text-dark">Go</span>
+          </a>
+          <p class="text-muted mt-2">Masuk untuk memesan lapangan olahraga favorit Anda</p>
+        </div>
+
+        <div class="premium-card p-4 p-md-5">
+          <h3 class="fw-bold mb-4 text-center">Masuk Akun</h3>
+          
+          <form id="login-form">
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold">Alamat Email</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                <input type="email" class="form-placeholder form-control border-start-0" id="email" placeholder="nama@email.com" required>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="d-flex justify-content-between mb-1">
+                <label for="password" class="form-label fw-semibold mb-0">Password</label>
+                <a href="#" class="text-decoration-none small text-primary fw-semibold">Lupa Password?</a>
+              </div>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
+                <input type="password" class="form-placeholder form-control border-start-0" id="password" placeholder="••••••••" required>
+              </div>
+            </div>
+
+            <div class="mb-4 form-check">
+              <input type="checkbox" class="form-check-input" id="remember-me">
+              <label class="form-check-label text-muted small" for="remember-me">Ingat saya di perangkat ini</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 gradient-btn py-3 fw-bold rounded mb-3">
+              Masuk Sekarang <i class="bi bi-box-arrow-in-right ms-1"></i>
+            </button>
+            
+            <p class="text-center text-muted small mb-0">Belum punya akun? <a href="/register.html" class="text-primary fw-semibold text-decoration-none">Daftar disini</a></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // If already logged in, redirect to home
+      if (Auth.isAuthenticated()) {
+        const user = Auth.getUser();
+        if (user.role === 'admin_sistem') window.location.href = '/admin/dashboard.html';
+        else if (user.role === 'mitra') window.location.href = '/mitra/dashboard.html';
+        else if (user.role === 'staff_cabang') window.location.href = '/staff/dashboard.html';
+        else window.location.href = '/';
+      }
+
+      const form = document.getElementById('login-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        App.showLoader();
+        try {
+          const session = await Auth.login(email, password);
+          App.hideLoader();
+          App.showToast('Login Berhasil!', 'success');
+          
+          setTimeout(() => {
+            if (session.user.role === 'admin_sistem') {
+              window.location.href = '/admin/dashboard.html';
+            } else if (session.user.role === 'mitra') {
+              window.location.href = '/mitra/dashboard.html';
+            } else if (session.user.role === 'staff_cabang') {
+              window.location.href = '/staff/dashboard.html';
+            } else {
+              window.location.href = '/';
+            }
+          }, 1000);
+        } catch (error) {
+          App.hideLoader();
+          App.showAlert('Gagal Masuk', error.message, 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

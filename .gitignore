@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment variables (JANGAN diupload ke GitHub!)
+.env
+
+# Uploads (file user, bukan kode)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/

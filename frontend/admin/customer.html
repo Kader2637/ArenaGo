@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Pengguna - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Pengguna</h1>
+          <p class="text-muted">Aktifkan/nonaktifkan akun customer atau pemilik lapangan (mitra), dan reset password.</p>
+        </div>
+      </div>
+
+      <!-- Filters & Actions Panel -->
+      <div class="premium-card p-3 bg-white mb-4 shadow-sm">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-5">
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control border-start-0" id="search-user" placeholder="Cari nama atau email..." oninput="loadUsersTable()">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" id="filter-role" onchange="loadUsersTable()">
+              <option value="">Semua Peran (Role)</option>
+              <option value="customer">Customer</option>
+              <option value="mitra">Mitra (Owner)</option>
+              <option value="staff_cabang">Staff Cabang</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" id="filter-status" onchange="loadUsersTable()">
+              <option value="">Semua Status</option>
+              <option value="aktif">Aktif</option>
+              <option value="nonaktif">Nonaktif</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Avatar</th>
+              <th>Nama Pengguna</th>
+              <th>Alamat Email</th>
+              <th>Nomor HP</th>
+              <th>Peran</th>
+              <th>Status</th>
+              <th class="text-end">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <tr>
+              <td colspan="7" class="text-center text-muted">Memuat data pengguna...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal Popup -->
+  <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Reset Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="reset-password-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="reset-user-id">
+            <p class="text-muted small mb-3">Tulis sandi baru untuk akun pengguna ini. Password minimal terdiri dari 6 karakter.</p>
+            
+            <div class="mb-3">
+              <label for="new-pass" class="form-label fw-bold text-secondary">Password Baru</label>
+              <input type="password" class="form-control" id="new-pass" placeholder="••••••••" required minlength="6">
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Setel Ulang</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['admin_sistem']);
+
+    let resetModalObj = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      resetModalObj = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+      loadUsersTable();
+
+      document.getElementById('reset-password-form').addEventListener('submit', handleResetPassword);
+    });
+
+    async function loadUsersTable() {
+      const search = document.getElementById('search-user').value.trim();
+      const role = document.getElementById('filter-role').value;
+      const status = document.getElementById('filter-status').value;
+
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (role) params.append('role', role);
+      if (status) params.append('status', status);
+
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/users?${params.toString()}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTable(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTable(users) {
+      const tbody = document.getElementById('users-table-body');
+      tbody.innerHTML = '';
+
+      // Filter out admin_sistem so admins cannot touch themselves or other admins
+      const activeUsers = users.filter(u => u.role !== 'admin_sistem');
+
+      if (activeUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Tidak ada data pengguna ditemukan</td></tr>`;
+        return;
+      }
+
+      activeUsers.forEach(u => {
+        const row = document.createElement('tr');
+        const imgUrl = u.foto ? `${BASE_URL}/uploads/users/${u.foto}` : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
+        
+        const statusActionBtn = u.status === 'aktif' 
+          ? `<button onclick="toggleUserStatus('${u.id}', 'nonaktif', '${u.nama}')" class="btn btn-sm btn-outline-danger rounded me-1" title="Bekukan Akun"><i class="bi bi-person-x-fill"></i> Bekukan</button>`
+          : `<button onclick="toggleUserStatus('${u.id}', 'aktif', '${u.nama}')" class="btn btn-sm btn-outline-success rounded me-1" title="Aktifkan Akun"><i class="bi bi-person-check-fill"></i> Aktifkan</button>`;
+
+        row.innerHTML = `
+          <td><img src="${imgUrl}" class="rounded-circle border" width="36" height="36" alt="${u.nama}"></td>
+          <td><strong class="text-dark">${u.nama}</strong></td>
+          <td><small class="text-muted">${u.email}</small></td>
+          <td><small class="text-muted">${u.no_hp || '-'}</small></td>
+          <td><span class="badge bg-secondary-subtle text-secondary text-capitalize">${u.role.replace('_', ' ')}</span></td>
+          <td>
+            <span class="badge ${u.status === 'aktif' ? 'bg-success' : 'bg-danger'}">${u.status}</span>
+          </td>
+          <td class="text-end">
+            ${statusActionBtn}
+            <button onclick="openResetModal('${u.id}')" class="btn btn-sm btn-outline-primary rounded" title="Reset Password"><i class="bi bi-key"></i> Reset</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function toggleUserStatus(id, nextStatus, name) {
+      const verb = nextStatus === 'aktif' ? 'mengaktifkan' : 'membekukan';
+      App.showConfirm(`${nextStatus === 'aktif' ? 'Aktifkan' : 'Bekukan'} Akun`, `Apakah Anda yakin ingin ${verb} kembali akun ${name}?`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/users/${id}/status`, {
+              method: 'PATCH',
+              body: JSON.stringify({ status: nextStatus })
+            });
+            App.hideLoader();
+
+            if (response.ok) {
+              App.showToast(`Akun berhasil di-${nextStatus === 'aktif' ? 'aktifkan' : 'nonaktifkan'}`, 'success');
+              loadUsersTable();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    function openResetModal(userId) {
+      document.getElementById('reset-user-id').value = userId;
+      document.getElementById('new-pass').value = '';
+      resetModalObj.show();
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('reset-user-id').value;
+      const pass = document.getElementById('new-pass').value.trim();
+
+      if (pass.length < 6) {
+        App.showAlert('Error', 'Sandi baru minimal harus 6 karakter.', 'warning');
+        return;
+      }
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/users/${id}/reset-password`, {
+          method: 'POST',
+          body: JSON.stringify({ password_baru: pass })
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          resetModalObj.hide();
+          App.showAlert('Reset Berhasil', 'Kata sandi pengguna baru berhasil dipasang.', 'success');
+        } else {
+          const res = await response.json();
+          App.showAlert('Reset Gagal', res.message || 'Gagal reset sandi.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

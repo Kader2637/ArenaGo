@@ -1,0 +1,90 @@
+<div class="d-flex flex-column flex-shrink-0 admin-sidebar-fixed">
+
+  <!-- Brand -->
+  <div class="p-3 border-bottom">
+    <a href="/" class="d-flex align-items-center text-decoration-none">
+      <i class="bi bi-lightning-fill text-primary fs-3 me-2"></i>
+      <span class="fs-5 fw-bold" style="color: var(--primary-color);">Arena<span style="color: var(--text-dark);">Go</span></span>
+    </a>
+  </div>
+
+  <!-- Nav Menus -->
+  <div class="flex-grow-1 overflow-auto p-2 pt-3">
+
+    <!-- ADMIN SISTEM MENU -->
+    <ul class="nav flex-column d-none mb-2" id="sidebar-admin-menu">
+      <li class="nav-item mb-1">
+        <a href="/admin/dashboard.html" class="sidebar-nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/admin/pemesanan.html" class="sidebar-nav-link"><i class="bi bi-calendar-check"></i> Kelola Pemesanan</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/admin/kategori.html" class="sidebar-nav-link"><i class="bi bi-grid"></i> Kelola Kategori</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/admin/customer.html" class="sidebar-nav-link"><i class="bi bi-people"></i> Kelola Pengguna</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/admin/laporan.html" class="sidebar-nav-link"><i class="bi bi-file-earmark-bar-graph"></i> Laporan Komisi</a>
+      </li>
+    </ul>
+
+    <!-- MITRA MENU -->
+    <ul class="nav flex-column d-none mb-2" id="sidebar-mitra-menu">
+      <li class="nav-item mb-1">
+        <a href="/mitra/dashboard.html" class="sidebar-nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/mitra/cabang.html" class="sidebar-nav-link"><i class="bi bi-building"></i> Kelola Cabang</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/mitra/lapangan.html" class="sidebar-nav-link"><i class="bi bi-layers"></i> Kelola Lapangan</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/mitra/booking.html" class="sidebar-nav-link"><i class="bi bi-calendar-check"></i> Kelola Booking</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/mitra/pembayaran.html" class="sidebar-nav-link"><i class="bi bi-wallet2"></i> Kelola Pembayaran</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/mitra/voucher.html" class="sidebar-nav-link"><i class="bi bi-ticket-perforated"></i> Kelola Voucher</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/mitra/laporan.html" class="sidebar-nav-link"><i class="bi bi-graph-up-arrow"></i> Laporan Keuangan</a>
+      </li>
+    </ul>
+
+    <!-- STAFF MENU -->
+    <ul class="nav flex-column d-none mb-2" id="sidebar-staff-menu">
+      <li class="nav-item mb-1">
+        <a href="/staff/dashboard.html" class="sidebar-nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/staff/checkin.html" class="sidebar-nav-link"><i class="bi bi-qr-code-scan"></i> Scan QR Check-In</a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="/staff/booking.html" class="sidebar-nav-link"><i class="bi bi-calendar-week"></i> Jadwal Cabang</a>
+      </li>
+    </ul>
+
+  </div>
+
+  <!-- User Profile Footer -->
+  <div class="p-3 border-top">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">
+        <i class="bi bi-person-fill text-white"></i>
+      </div>
+      <div class="overflow-hidden">
+        <div class="fw-bold text-dark text-truncate small" id="sidebar-user-name">Memuat...</div>
+        <div class="text-muted" style="font-size:11px;" id="sidebar-user-role">-</div>
+      </div>
+    </div>
+    <a href="/customer/profile.html" class="sidebar-nav-link mb-1"><i class="bi bi-person"></i> Edit Profil</a>
+    <a href="#" class="sidebar-nav-link text-danger" id="sidebar-logout-btn"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+  </div>
+</div>
+
+<!-- Mobile Overlay -->
+<div id="sidebar-overlay" class="d-none" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;"></div>

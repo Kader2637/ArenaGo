@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Komisi Platform - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Laporan Komisi Platform</h1>
+          <p class="text-muted">Pantau rekap komisi pemesanan lapangan olahraga terverifikasi.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button onclick="exportToExcel()" class="btn btn-outline-success rounded fw-bold"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel</button>
+          <button onclick="exportToPDF()" class="btn btn-danger rounded fw-bold"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</button>
+        </div>
+      </div>
+
+      <!-- Date Filters Panel -->
+      <div class="premium-card p-3 bg-white mb-4 shadow-sm">
+        <form id="filter-laporan" class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="start-date" class="form-label fw-bold text-secondary small">Dari Tanggal</label>
+            <input type="date" class="form-control" id="start-date">
+          </div>
+          <div class="col-md-4">
+            <label for="end-date" class="form-label fw-bold text-secondary small">Hingga Tanggal</label>
+            <input type="date" class="form-control" id="end-date">
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold gradient-btn"><i class="bi bi-funnel"></i> Saring Data</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Report Card & Table -->
+      <div class="premium-card p-4 bg-white shadow-sm mb-4">
+        <div class="d-flex justify-content-between mb-3">
+          <h5 class="fw-bold mb-0">Rincian Transaksi Selesai</h5>
+          <h5 class="fw-bold text-primary mb-0" id="total-commissions-label">Total Komisi: Rp 0</h5>
+        </div>
+        
+        <table class="table table-hover align-middle" id="report-table">
+          <thead class="table-light">
+            <tr>
+              <th>Kode Booking</th>
+              <th>Tanggal</th>
+              <th>Customer</th>
+              <th>Nama Lapangan</th>
+              <th class="text-end">Nilai Booking</th>
+              <th class="text-center">Rate Komisi</th>
+              <th class="text-end">Komisi Platform</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <tr>
+              <td colspan="7" class="text-center text-muted">Memuat data laporan keuangan...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Excel/PDF CDN scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['admin_sistem']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCommissionsReport();
+
+      document.getElementById('filter-laporan').addEventListener('submit', (e) => {
+        e.preventDefault();
+        loadCommissionsReport();
+      });
+    });
+
+    async function loadCommissionsReport() {
+      App.showLoader();
+      try {
+        // Query completed bookings
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking?status=completed`);
+        App.hideLoader();
+        
+        if (response.ok) {
+          const res = await response.json();
+          filterAndRenderReport(res.data);
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function filterAndRenderReport(bookings) {
+      const startVal = document.getElementById('start-date').value;
+      const endVal = document.getElementById('end-date').value;
+      
+      let list = bookings;
+      if (startVal) {
+        const start = new Date(startVal);
+        list = list.filter(b => new Date(b.tanggal) >= start);
+      }
+      if (endVal) {
+        const end = new Date(endVal);
+        list = list.filter(b => new Date(b.tanggal) <= end);
+      }
+
+      const tbody = document.getElementById('report-table-body');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Tidak ada transaksi komisi pada rentang waktu ini.</td></tr>`;
+        document.getElementById('total-commissions-label').textContent = 'Total Komisi: Rp 0';
+        return;
+      }
+
+      let totalCommissions = 0;
+
+      list.forEach(b => {
+        // Calculate 10% commission default or fetched
+        const commissionRate = 10; 
+        const commissionVal = (commissionRate / 100) * parseFloat(b.total);
+        totalCommissions += commissionVal;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong class="text-primary">${b.kode_booking}</strong></td>
+          <td><small class="text-muted">${App.formatDate(b.tanggal)}</small></td>
+          <td><small class="text-dark">${b.nama_user}</small></td>
+          <td><small class="text-dark">${b.nama_lapangan}</small></td>
+          <td class="text-end fw-semibold">${App.formatRupiah(parseFloat(b.total))}</td>
+          <td class="text-center"><span class="badge bg-secondary-subtle text-secondary">${commissionRate}%</span></td>
+          <td class="text-end fw-bold text-success">${App.formatRupiah(commissionVal)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('total-commissions-label').textContent = `Total Komisi: ${App.formatRupiah(totalCommissions)}`;
+    }
+
+    function exportToExcel() {
+      const table = document.getElementById('report-table');
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Laporan Komisi" });
+      XLSX.writeFile(wb, 'Laporan_Komisi_Platform_ArenaGo.xlsx');
+      App.showToast('Laporan Excel berhasil diunduh', 'success');
+    }
+
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      doc.setFont("Outfit", "normal");
+      doc.setFontSize(18);
+      doc.text('Laporan Komisi Platform - ArenaGo', 14, 20);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 26);
+      
+      doc.autoTable({
+        html: '#report-table',
+        startY: 32,
+        theme: 'striped',
+        headStyles: { fillColor: [37, 99, 235] },
+        columns: [
+          { header: 'Kode', dataKey: 'Kode' },
+          { header: 'Tanggal', dataKey: 'Tanggal' },
+          { header: 'Customer', dataKey: 'Customer' },
+          { header: 'Lapangan', dataKey: 'Lapangan' },
+          { header: 'Nilai Booking', dataKey: 'Nilai' },
+          { header: 'Rate', dataKey: 'Rate' },
+          { header: 'Komisi', dataKey: 'Komisi' },
+        ]
+      });
+
+      doc.save('Laporan_Komisi_Platform_ArenaGo.pdf');
+      App.showToast('Laporan PDF berhasil diunduh', 'success');
+    }
+  </script>
+</body>
+</html>

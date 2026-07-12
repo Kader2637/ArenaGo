@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Check-In - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="mb-4">
+        <h1 class="fw-bold mb-1 text-dark">Scan QR Code Check-In</h1>
+        <p class="text-muted">Arahkan kamera ke QR Code tiket booking customer untuk memproses check-in.</p>
+      </div>
+
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="premium-card p-4 bg-white text-center shadow-sm">
+            <h5 class="fw-bold mb-3"><i class="bi bi-camera-video text-primary me-2"></i>Kamera QR Code Reader</h5>
+            
+            <!-- Camera Scanner Frame -->
+            <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; overflow: hidden; border-radius: 12px; border: 2px dashed #ccc;" class="mb-4"></div>
+            
+            <div class="d-flex gap-2 justify-content-center">
+              <button onclick="startScanning()" class="btn btn-primary rounded fw-bold gradient-btn"><i class="bi bi-play-circle"></i> Mulai Kamera</button>
+              <button onclick="stopScanning()" class="btn btn-outline-secondary rounded fw-bold"><i class="bi bi-stop-circle"></i> Stop</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['staff_cabang', 'mitra']);
+
+    let html5QrcodeScanner = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Start scanning automatically on load
+      startScanning();
+    });
+
+    function startScanning() {
+      if (html5QrcodeScanner) {
+        stopScanning();
+      }
+
+      // Initialize scanner
+      html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        /* verbose= */ false
+      );
+
+      html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    }
+
+    function stopScanning() {
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(err => console.error("Error clearing scanner:", err));
+        html5QrcodeScanner = null;
+      }
+    }
+
+    async function onScanSuccess(decodedText, decodedResult) {
+      // Stop scanner to avoid multiple hits
+      stopScanning();
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/check-in`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ qrToken: decodedText })
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          const res = await response.json();
+          const b = res.data.booking;
+
+          Swal.fire({
+            title: 'Check-In Berhasil!',
+            html: `
+              <div class="text-start p-3 bg-light rounded border">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Kode Booking</span>
+                  <strong class="text-primary">${b.kode_booking}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Customer</span>
+                  <strong class="text-dark">${b.nama_user}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted small">Lapangan</span>
+                  <strong class="text-dark">${b.nama_lapangan}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted small">Jadwal Jam</span>
+                  <strong class="text-dark">${b.jam_mulai.slice(0, 5)} - ${b.jam_selesai.slice(0, 5)}</strong>
+                </div>
+              </div>
+            `,
+            icon: 'success',
+            confirmButtonText: 'Lanjutkan Scan',
+            customClass: {
+              confirmButton: 'btn btn-primary px-5 rounded gradient-btn fw-bold'
+            },
+            buttonsStyling: false
+          }).then(() => {
+            // Restart camera
+            startScanning();
+          });
+        } else {
+          const res = await response.json();
+          Swal.fire({
+            title: 'Check-In Gagal',
+            text: res.message || 'Token QR Code tidak valid atau kedaluwarsa.',
+            icon: 'error',
+            confirmButtonText: 'Coba Lagi',
+            customClass: {
+              confirmButton: 'btn btn-danger px-5 rounded fw-bold'
+            },
+            buttonsStyling: false
+          }).then(() => {
+            startScanning();
+          });
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+        Swal.fire({
+          title: 'Error Sistem',
+          text: 'Gagal memproses verifikasi token check-in.',
+          icon: 'error',
+          confirmButtonText: 'Kembali',
+          customClass: {
+            confirmButton: 'btn btn-secondary px-5 rounded fw-bold'
+          },
+          buttonsStyling: false
+        }).then(() => {
+          startScanning();
+        });
+      }
+    }
+
+    function onScanFailure(error) {
+      // Handle scan failure, usually silent to keep scanning
+    }
+  </script>
+</body>
+</html>

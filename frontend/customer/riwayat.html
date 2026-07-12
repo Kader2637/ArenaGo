@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat Pemesanan - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-5" style="min-height: 80vh;">
+    <h2 class="fw-bold mb-4"><i class="bi bi-person-workspace text-primary me-2"></i>Dashboard Customer</h2>
+
+    <div class="row g-4">
+      <!-- Left side: tabs selection navigation -->
+      <div class="col-lg-3">
+        <div class="premium-card p-3 bg-white">
+          <div class="nav flex-column nav-pills" id="dashboardTabs" role="tablist">
+            <button class="nav-link text-start w-100 fw-semibold mb-2 active" id="history-tab" data-bs-toggle="pill" data-bs-target="#history-pane" type="button" role="tab"><i class="bi bi-calendar2-range me-2"></i>Pemesanan Saya</button>
+            <button class="nav-link text-start w-100 fw-semibold mb-2" id="wishlist-tab" data-bs-toggle="pill" data-bs-target="#wishlist-pane" type="button" role="tab"><i class="bi bi-heart me-2"></i>Wishlist Favorit</button>
+            <button class="nav-link text-start w-100 fw-semibold mb-2" id="notif-tab" data-bs-toggle="pill" data-bs-target="#notif-pane" type="button" role="tab"><i class="bi bi-bell me-2"></i>Notifikasi <span class="badge bg-danger rounded-pill ms-2 d-none" id="tab-notif-badge">0</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: tabs pane container -->
+      <div class="col-lg-9">
+        <div class="tab-content" id="dashboardTabContent">
+          
+          <!-- Booking history tab pane -->
+          <div class="tab-pane fade show active" id="history-pane" role="tabpanel">
+            <h4 class="fw-bold mb-3">Daftar Pemesanan Lapangan</h4>
+            <div id="bookings-list" class="d-flex flex-column gap-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Wishlist tab pane -->
+          <div class="tab-pane fade" id="wishlist-pane" role="tabpanel">
+            <h4 class="fw-bold mb-3">Lapangan Terfavorit</h4>
+            <div class="row g-4" id="wishlist-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Notification tab pane -->
+          <div class="tab-pane fade" id="notif-pane" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="fw-bold mb-0">Notifikasi Masuk</h4>
+              <button onclick="markAllNotificationsRead()" class="btn btn-sm btn-outline-primary rounded">Tandai Semua Dibaca</button>
+            </div>
+            <div class="list-group shadow-sm border rounded" id="notifications-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Checkin Modal Popup -->
+  <div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-body text-center p-4">
+          <h5 class="fw-bold mb-3">QR Code Check-In</h5>
+          <p class="text-muted small">Tunjukkan QR Code ini kepada Staff Cabang di lokasi untuk check-in lapangan.</p>
+          <div class="p-3 bg-light rounded border d-inline-block mb-3">
+            <img id="qr-image" src="" alt="Checkin QR Code" class="img-fluid" style="width: 200px; height: 200px;">
+          </div>
+          <h6 class="fw-bold text-primary mb-1" id="qr-booking-code">GO-XXXXX</h6>
+          <small class="text-muted d-block mb-3">Berlaku selama 24 jam</small>
+          <button type="button" class="btn btn-outline-secondary w-100 rounded" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Review Submission Modal Popup -->
+  <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Beri Ulasan Lapangan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="review-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="review-booking-id">
+            
+            <div class="mb-3">
+              <label for="review-rating" class="form-label fw-bold text-secondary">Rating</label>
+              <select class="form-select" id="review-rating" required>
+                <option value="5" selected>⭐️⭐️⭐️⭐️⭐️ (Sangat Puas)</option>
+                <option value="4">⭐️⭐️⭐️⭐️ (Puas)</option>
+                <option value="3">⭐️⭐️⭐️ (Cukup)</option>
+                <option value="2">⭐️⭐️ (Kurang Puas)</option>
+                <option value="1">⭐️ (Kecewa)</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="review-komentar" class="form-label fw-bold text-secondary">Ulasan Anda</label>
+              <textarea class="form-control" id="review-komentar" rows="4" placeholder="Bagikan pengalaman bermain Anda di lapangan olahraga ini..." required></textarea>
+            </div>
+
+            <div class="mb-2">
+              <label for="review-photo" class="form-label fw-bold text-secondary">Foto Lapangan (Opsional)</label>
+              <input type="file" class="form-control" id="review-photo" accept="image/*">
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Kirim Ulasan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Invoice Print Modal Popup -->
+  <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0">Invoice Receipt</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="invoice-print-area">
+          <div class="d-flex justify-content-between mb-4">
+            <div>
+              <h4 class="fw-bold text-primary mb-1"><i class="bi bi-lightning-fill me-1"></i>ArenaGo</h4>
+              <p class="text-muted small mb-0">Sports Marketplace Billing</p>
+            </div>
+            <div class="text-end">
+              <h5 class="fw-bold mb-1" id="inv-num">INV-XXXX</h5>
+              <p class="text-muted small mb-0" id="inv-date">Tanggal: -</p>
+            </div>
+          </div>
+          
+          <hr>
+
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <small class="text-muted d-block">Penyewa:</small>
+              <strong id="inv-user-name">-</strong>
+              <div class="text-muted small" id="inv-user-contact">-</div>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <small class="text-muted d-block">Lapangan / Tempat:</small>
+              <strong id="inv-field-name">-</strong>
+              <div class="text-muted small" id="inv-branch-address">-</div>
+            </div>
+          </div>
+
+          <table class="table table-bordered small">
+            <thead class="table-light">
+              <tr>
+                <th>Detail Sewa</th>
+                <th class="text-center">Durasi</th>
+                <th class="text-end">Harga/Jam</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong id="inv-item-desc">Sewa Lapangan</strong>
+                  <div class="text-muted" id="inv-item-time">Jam: -</div>
+                </td>
+                <td class="text-center" id="inv-item-duration">- Jam</td>
+                <td class="text-end" id="inv-item-rate">Rp 0</td>
+                <td class="text-end" id="inv-item-subtotal">Rp 0</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-end fw-semibold">Diskon Voucher</td>
+                <td class="text-end text-success" id="inv-item-discount">-Rp 0</td>
+              </tr>
+              <tr class="table-light">
+                <td colspan="3" class="text-end fw-bold">Total Pembayaran</td>
+                <td class="text-end fw-bold text-primary" id="inv-item-total">Rp 0</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="text-center mt-4 pt-3 border-top text-muted small">
+            <p class="mb-0">Terima kasih telah memesan lapangan melalui ArenaGo. Selamat berolahraga!</p>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Tutup</button>
+          <button type="button" onclick="printInvoice()" class="btn btn-primary rounded fw-bold px-4"><i class="bi bi-printer me-1"></i> Cetak Invoice</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['customer']);
+
+    let invoiceModalObj = null;
+    let qrModalObj = null;
+    let reviewModalObj = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      invoiceModalObj = new bootstrap.Modal(document.getElementById('invoiceModal'));
+      qrModalObj = new bootstrap.Modal(document.getElementById('qrModal'));
+      reviewModalObj = new bootstrap.Modal(document.getElementById('reviewModal'));
+
+      // Check query param to trigger active tabs
+      const tabParam = App.getQueryParam('tab');
+      if (tabParam === 'wishlist') {
+        document.getElementById('wishlist-tab').click();
+      } else if (tabParam === 'notif') {
+        document.getElementById('notif-tab').click();
+      }
+
+      loadMyBookings();
+      loadMyWishlist();
+      loadMyNotifications();
+
+      document.getElementById('review-form').addEventListener('submit', handleReviewSubmit);
+
+      // Listen for tab clicks to reload data
+      document.getElementById('history-tab').addEventListener('click', loadMyBookings);
+      document.getElementById('wishlist-tab').addEventListener('click', loadMyWishlist);
+      document.getElementById('notif-tab').addEventListener('click', loadMyNotifications);
+    });
+
+    async function loadMyBookings() {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          renderBookings(res.data);
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function renderBookings(bookings) {
+      const container = document.getElementById('bookings-list');
+      container.innerHTML = '';
+
+      if (bookings.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5 bg-white rounded shadow-sm border">
+            <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
+            <h5 class="fw-bold text-secondary">Belum Ada Pemesanan</h5>
+            <p class="text-muted">Ayo cari lapangan dan lakukan booking pertama Anda!</p>
+            <a href="/customer/lapangan.html" class="btn btn-primary rounded gradient-btn mt-2">Cari Lapangan</a>
+          </div>
+        `;
+        return;
+      }
+
+      bookings.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'premium-card p-4 bg-white d-flex flex-column gap-3 shadow-sm';
+        
+        let actionBtnHtml = '';
+        if (['pending', 'waiting_payment'].includes(b.status)) {
+          actionBtnHtml = `
+            <a href="/customer/pembayaran.html?booking_id=${b.id}" class="btn btn-primary rounded btn-sm gradient-btn fw-bold"><i class="bi bi-wallet2 me-1"></i> Bayar Sekarang</a>
+            <button onclick="cancelBooking('${b.id}')" class="btn btn-outline-danger rounded btn-sm fw-bold">Batalkan</button>
+          `;
+        } else if (['approved', 'checked_in', 'playing'].includes(b.status)) {
+          actionBtnHtml = `
+            <button onclick="showCheckinQR('${b.id}', '${b.kode_booking}')" class="btn btn-primary rounded btn-sm gradient-btn fw-bold"><i class="bi bi-qr-code-scan me-1"></i> Tampilkan QR</button>
+            <button onclick="showInvoice('${b.id}')" class="btn btn-outline-primary rounded btn-sm fw-bold"><i class="bi bi-file-earmark-text me-1"></i> Invoice</button>
+          `;
+        } else if (b.status === 'completed') {
+          actionBtnHtml = `
+            <button onclick="openReviewModal('${b.id}')" class="btn btn-outline-success rounded btn-sm fw-bold"><i class="bi bi-chat-heart me-1"></i> Beri Ulasan</button>
+            <button onclick="showInvoice('${b.id}')" class="btn btn-outline-primary rounded btn-sm fw-bold"><i class="bi bi-file-earmark-text me-1"></i> Invoice</button>
+          `;
+        }
+
+        const dateFormatted = App.formatDate(b.tanggal);
+        
+        card.innerHTML = `
+          <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2">
+            <div>
+              <strong class="text-primary fs-5">${b.kode_booking}</strong>
+              <small class="text-muted ms-2">Dibuat: ${App.formatDate(b.created_at, true)}</small>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="badge-status ${b.status}">${b.status.replace('_', ' ')}</span>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col-md-7">
+              <h5 class="fw-bold text-dark mb-1">${b.nama_lapangan}</h5>
+              <p class="text-muted small mb-0"><i class="bi bi-geo-alt me-1 text-danger"></i>${b.nama_cabang} - ${b.kota}</p>
+              <div class="text-muted small mt-2">
+                <span class="me-3"><i class="bi bi-calendar-event me-1"></i>${dateFormatted}</span>
+                <span><i class="bi bi-clock me-1"></i>${b.jam_mulai.slice(0, 5)} - ${b.jam_selesai.slice(0, 5)} (${b.durasi} Jam)</span>
+              </div>
+            </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+              <small class="text-muted d-block">Total Pembayaran</small>
+              <h4 class="fw-bold text-primary mb-0">${App.formatRupiah(parseFloat(b.total))}</h4>
+            </div>
+          </div>
+          <div class="d-flex gap-2 justify-content-end border-top pt-2">
+            ${actionBtnHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function cancelBooking(bookingId) {
+      App.showConfirm('Batalkan Booking', 'Apakah Anda yakin ingin membatalkan pemesanan lapangan ini?').then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}/status`, {
+              method: 'POST',
+              body: JSON.stringify({ status: 'cancelled', catatan: 'Dibatalkan oleh customer' })
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Booking dibatalkan', 'success');
+              loadMyBookings();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    async function showCheckinQR(bookingId, code) {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}/qr`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          const qrToken = res.data.qrToken;
+          
+          document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrToken)}`;
+          document.getElementById('qr-booking-code').textContent = code;
+          qrModalObj.show();
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function showInvoice(bookingId) {
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}`);
+        App.hideLoader();
+        if (response.ok) {
+          const res = await response.json();
+          const { booking } = res.data;
+          
+          document.getElementById('inv-num').textContent = booking.nomor_invoice || 'BILL-DRAFT';
+          document.getElementById('inv-date').textContent = `Tanggal: ${App.formatDate(booking.tanggal_invoice || booking.created_at)}`;
+          document.getElementById('inv-user-name').textContent = booking.nama_user;
+          document.getElementById('inv-user-contact').textContent = `Email: ${booking.email_user} | HP: ${booking.no_hp_user || '-'}`;
+          document.getElementById('inv-field-name').textContent = booking.nama_lapangan;
+          document.getElementById('inv-branch-address').textContent = `${booking.nama_cabang}, ${booking.alamat_cabang}, ${booking.kota}`;
+          
+          document.getElementById('inv-item-desc').innerHTML = `Sewa Lapangan ${booking.nama_lapangan} (${booking.tipe_lapangan})`;
+          document.getElementById('inv-item-time').textContent = `Jadwal: ${App.formatDate(booking.tanggal)} | Jam: ${booking.jam_mulai.slice(0, 5)} - ${booking.jam_selesai.slice(0, 5)}`;
+          document.getElementById('inv-item-duration').textContent = booking.durasi;
+          document.getElementById('inv-item-rate').textContent = App.formatRupiah(parseFloat(booking.harga_per_jam));
+          document.getElementById('inv-item-subtotal').textContent = App.formatRupiah(parseFloat(booking.subtotal));
+          document.getElementById('inv-item-discount').textContent = `- ${App.formatRupiah(parseFloat(booking.diskon))}`;
+          document.getElementById('inv-item-total').textContent = App.formatRupiah(parseFloat(booking.total));
+
+          invoiceModalObj.show();
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function printInvoice() {
+      const printContents = document.getElementById('invoice-print-area').innerHTML;
+      const originalContents = document.body.innerHTML;
+
+      document.body.innerHTML = `
+        <html>
+          <head>
+            <title>Cetak Invoice ArenaGo</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+              body { padding: 40px; }
+            </style>
+          </head>
+          <body onload="window.print(); window.close();">
+            ${printContents}
+          </body>
+        </html>
+      `;
+
+      window.print();
+      // Restore page content
+      location.reload();
+    }
+
+    function openReviewModal(bookingId) {
+      document.getElementById('review-booking-id').value = bookingId;
+      document.getElementById('review-rating').value = '5';
+      document.getElementById('review-komentar').value = '';
+      document.getElementById('review-photo').value = '';
+      reviewModalObj.show();
+    }
+
+    async function handleReviewSubmit(e) {
+      e.preventDefault();
+      
+      const bookingId = document.getElementById('review-booking-id').value;
+      const rating = document.getElementById('review-rating').value;
+      const komentar = document.getElementById('review-komentar').value.trim();
+      const fileInput = document.getElementById('review-photo');
+      const file = fileInput.files[0];
+
+      const formData = new FormData();
+      formData.append('booking_id', bookingId);
+      formData.append('rating', rating);
+      formData.append('komentar', komentar);
+      if (file) formData.append('foto_review', file);
+
+      App.showLoader();
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/review`, {
+          method: 'POST',
+          body: formData
+        });
+        App.hideLoader();
+
+        if (response.ok) {
+          reviewModalObj.hide();
+          App.showAlert('Ulasan Dikirim', 'Terima kasih atas ulasan Anda untuk lapangan olahraga ini!', 'success');
+          loadMyBookings();
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal Mengulas', res.message || 'Gagal menyimpan ulasan.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function loadMyWishlist() {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/wishlist`);
+        if (response.ok) {
+          const res = await response.json();
+          renderWishlist(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderWishlist(list) {
+      const container = document.getElementById('wishlist-list');
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-5 bg-white rounded border">
+            <i class="bi bi-heart display-4 text-muted mb-3 d-block"></i>
+            <h5 class="fw-bold text-secondary">Wishlist Kosong</h5>
+            <p class="text-muted">Simpan lapangan olahraga yang Anda sukai disini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        card.innerHTML = `
+          <div class="premium-card h-100 bg-white p-3 d-flex flex-column justify-content-between shadow-sm">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-secondary-subtle text-secondary small">${item.nama_kategori}</span>
+                <button onclick="removeFromWishlist('${item.id}')" class="btn btn-sm btn-light text-danger rounded-circle" title="Hapus"><i class="bi bi-heart-fill"></i></button>
+              </div>
+              <h5 class="fw-bold text-dark mb-1 text-truncate">${item.nama}</h5>
+              <p class="text-muted small mb-2"><i class="bi-geo-alt text-danger me-1"></i>${item.nama_cabang} - ${item.kota}</p>
+              <strong class="text-primary d-block mb-3">${App.formatRupiah(parseFloat(item.harga_per_jam))}/jam</strong>
+            </div>
+            <a href="/customer/detail-lapangan.html?id=${item.lapangan_id}" class="btn btn-primary rounded btn-sm w-100 gradient-btn">Lihat Lapangan</a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function removeFromWishlist(id) {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/wishlist/${id}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          App.showToast('Lapangan dihapus dari favorit', 'success');
+          loadMyWishlist();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadMyNotifications() {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/notifikasi`);
+        if (response.ok) {
+          const res = await response.json();
+          renderNotifications(res.data);
+          
+          const unreadCount = res.meta.unreadCount || 0;
+          const navBadge = document.getElementById('notif-badge');
+          const tabBadge = document.getElementById('tab-notif-badge');
+
+          if (unreadCount > 0) {
+            if (navBadge) { navBadge.textContent = unreadCount; navBadge.classList.remove('d-none'); }
+            if (tabBadge) { tabBadge.textContent = unreadCount; tabBadge.classList.remove('d-none'); }
+          } else {
+            if (navBadge) navBadge.classList.add('d-none');
+            if (tabBadge) tabBadge.classList.add('d-none');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderNotifications(notifs) {
+      const container = document.getElementById('notifications-list');
+      container.innerHTML = '';
+
+      if (notifs.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5 bg-white rounded border border-top-0">
+            <i class="bi bi-bell-slash display-4 text-muted mb-3 d-block"></i>
+            <h5 class="fw-bold text-secondary">Tidak Ada Notifikasi</h5>
+            <p class="text-muted">Semua update pemesanan akan diinfokan disini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      notifs.forEach(n => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = `list-group-item list-group-item-action py-3 ${n.is_read ? 'bg-white' : 'bg-light border-start border-4 border-primary'}`;
+        
+        item.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <h6 class="fw-bold mb-0 text-dark">${n.judul}</h6>
+            <small class="text-muted">${App.formatDate(n.created_at, true)}</small>
+          </div>
+          <p class="text-muted small mb-0">${n.pesan}</p>
+        `;
+        
+        if (!n.is_read) {
+          item.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await markNotificationAsRead(n.id);
+          });
+        }
+        container.appendChild(item);
+      });
+    }
+
+    async function markNotificationAsRead(id) {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/notifikasi/${id}/read`, {
+          method: 'PATCH'
+        });
+        if (response.ok) {
+          loadMyNotifications();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function markAllNotificationsRead() {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/notifikasi/read-all`, {
+          method: 'POST'
+        });
+        if (response.ok) {
+          App.showToast('Semua notifikasi dibaca', 'success');
+          loadMyNotifications();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

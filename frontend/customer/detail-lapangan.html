@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Lapangan - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css?v=1.2" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div id="navbar-placeholder"></div>
+
+  <div class="container py-5">
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Beranda</a></li>
+        <li class="breadcrumb-item"><a href="/customer/lapangan.html" class="text-decoration-none">Lapangan</a></li>
+        <li class="breadcrumb-item active" aria-current="page" id="breadcrumb-active">Detail</li>
+      </ol>
+    </nav>
+
+    <!-- Field Header Section -->
+    <div class="row g-4 mb-5">
+      <!-- Image Gallery Slider -->
+      <div class="col-lg-7">
+        <div class="premium-card p-2 bg-white">
+          <div id="fieldGallery" class="carousel slide rounded" data-bs-ride="carousel">
+            <div class="carousel-inner" id="gallery-inner">
+              <div class="carousel-item active">
+                <img src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&q=80&w=1200" class="d-block w-100 object-fit-cover rounded" style="height: 400px;" alt="Field Default">
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#fieldGallery" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#fieldGallery" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Field Quick Info -->
+      <div class="col-lg-5">
+        <div class="premium-card p-4 h-100 bg-white d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="badge bg-primary text-uppercase px-3 py-2" id="field-type">Indoor</span>
+            <button class="btn btn-outline-danger btn-sm rounded" id="wishlist-btn" onclick="toggleWishlist()"><i class="bi bi-heart"></i> Favorit</button>
+          </div>
+          
+          <h2 class="fw-bold mb-1" id="field-name">Grand Futsal A</h2>
+          <p class="text-muted" id="field-branch"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Budi Sports Ijen - Malang</p>
+          
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-2 text-warning fs-5" id="stars-container">
+              <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+            </div>
+            <strong class="text-dark me-1" id="rating-avg">5.0</strong>
+            <span class="text-muted" id="review-count">(0 Ulasan)</span>
+          </div>
+
+          <p class="text-muted" id="field-desc">Memuat deskripsi lapangan olahraga...</p>
+          
+          <hr class="my-3">
+          
+          <div class="row g-2 mb-4">
+            <div class="col-6">
+              <small class="text-muted d-block">Kapasitas</small>
+              <strong id="field-capacity">-</strong>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block">Ukuran Lapangan</small>
+              <strong id="field-size">-</strong>
+            </div>
+            <div class="col-6 mt-2">
+              <small class="text-muted d-block">Jenis Lantai</small>
+              <strong id="field-floor">-</strong>
+            </div>
+            <div class="col-6 mt-2">
+              <small class="text-muted d-block">Pengelola</small>
+              <strong id="field-mitra">-</strong>
+            </div>
+          </div>
+
+          <div class="mt-auto">
+            <small class="text-muted d-block">Mulai dari</small>
+            <span class="text-primary fw-bold fs-2" id="field-price">Rp 0</span><small class="text-muted">/jam</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar Schedule Grid -->
+    <div class="row g-4 mb-5">
+      <div class="col-lg-8">
+        <div class="premium-card p-4 bg-white">
+          <h4 class="fw-bold mb-3"><i class="bi bi-calendar3 text-primary me-2"></i>Jadwal Lapangan (30-Menit)</h4>
+          <p class="text-muted small">Pilih tanggal bermain untuk memuat slot waktu yang tersedia.</p>
+          
+          <div class="row g-3 mb-4 align-items-end">
+            <div class="col-md-5">
+              <label for="booking-date" class="form-label fw-bold text-secondary">Tanggal Bermain</label>
+              <input type="date" class="form-control" id="booking-date">
+            </div>
+            <div class="col-md-7 d-flex gap-3 justify-content-start small text-muted pb-2">
+              <div class="d-flex align-items-center"><span class="d-inline-block rounded-circle bg-success me-2" style="width: 12px; height: 12px;"></span>Tersedia</div>
+              <div class="d-flex align-items-center"><span class="d-inline-block rounded-circle bg-warning me-2" style="width: 12px; height: 12px;"></span>Menunggu Pembayaran</div>
+              <div class="d-flex align-items-center"><span class="d-inline-block rounded-circle bg-danger me-2" style="width: 12px; height: 12px;"></span>Dibooking</div>
+            </div>
+          </div>
+
+          <!-- Slots Container Grid -->
+          <div class="time-slots-container" id="slots-grid">
+            <div class="text-center py-4 text-muted col-12">Silakan pilih tanggal terlebih dahulu.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Summary Widget -->
+      <div class="col-lg-4">
+        <div class="premium-card p-4 bg-white sticky-lg-top" style="top: 100px; z-index: 5;">
+          <h4 class="fw-bold mb-3">Ringkasan Pilihan</h4>
+          <div class="alert alert-info py-2 small"><i class="bi bi-info-circle me-1"></i>Pilih minimal 1 slot waktu yang berurutan.</div>
+          
+          <div class="mb-3">
+            <small class="text-muted d-block">Tanggal Pilihan</small>
+            <strong id="summary-date">-</strong>
+          </div>
+          <div class="mb-3">
+            <small class="text-muted d-block">Rentang Waktu</small>
+            <strong id="summary-time">-</strong>
+          </div>
+          <div class="mb-4">
+            <small class="text-muted d-block">Estimasi Subtotal</small>
+            <h3 class="text-primary fw-bold mb-0" id="summary-price">Rp 0</h3>
+          </div>
+
+          <button id="book-now-btn" class="btn btn-primary w-100 gradient-btn fw-bold py-3 rounded" onclick="proceedCheckout()">
+            Lanjutkan Booking <i class="bi bi-arrow-right-short fs-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Facilities Section -->
+    <div class="premium-card p-4 bg-white mb-5">
+      <h4 class="fw-bold mb-4"><i class="bi bi-box-fill text-primary me-2"></i>Fasilitas Lapangan</h4>
+      <div class="row g-3" id="facilities-container">
+        <!-- Dyn contents -->
+      </div>
+    </div>
+
+    <!-- Customer Reviews Section -->
+    <div class="premium-card p-4 bg-white mb-4">
+      <h4 class="fw-bold mb-4"><i class="bi bi-chat-left-text-fill text-primary me-2"></i>Ulasan & Review Customer</h4>
+      <div id="reviews-list-container">
+        <p class="text-muted">Belum ada ulasan untuk lapangan olahraga ini.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    const fieldId = App.getQueryParam('id');
+    let selectedSlots = []; // Array of slot items
+    let fieldDetails = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!fieldId) {
+        window.location.href = '/customer/lapangan.html';
+        return;
+      }
+
+      // Initialize date input
+      const dateInput = document.getElementById('booking-date');
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.min = today;
+      dateInput.value = today;
+
+      loadFieldDetails();
+      checkWishlistStatus();
+
+      dateInput.addEventListener('change', () => {
+        loadScheduleGrid();
+      });
+    });
+
+    async function loadFieldDetails() {
+      App.showLoader();
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/lapangan/${fieldId}`);
+        App.hideLoader();
+        
+        if (response.ok) {
+          const res = await response.json();
+          fieldDetails = res.data.field;
+          renderFieldInfo(res.data);
+          loadScheduleGrid();
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    function renderFieldInfo(data) {
+      const { field, fasilitas, galeri, harga_dinamis } = data;
+      
+      document.getElementById('breadcrumb-active').textContent = field.nama;
+      document.getElementById('field-name').textContent = field.nama;
+      document.getElementById('field-branch').innerHTML = `<i class="bi bi-geo-alt-fill text-danger me-1"></i>${field.nama_cabang} - ${field.kota}`;
+      document.getElementById('field-type').textContent = field.tipe;
+      document.getElementById('field-desc').textContent = field.deskripsi || 'Tidak ada deskripsi lapangan.';
+      document.getElementById('field-capacity').textContent = field.kapasitas || 'Standar';
+      document.getElementById('field-size').textContent = field.ukuran || 'Standar';
+      document.getElementById('field-floor').textContent = field.jenis_lantai || 'Standar';
+      document.getElementById('field-mitra').textContent = field.nama_perusahaan || 'Mitra ArenaGo';
+      document.getElementById('field-price').textContent = App.formatRupiah(parseFloat(field.harga_per_jam));
+      
+      // Ratings and reviews
+      const rating = field.rating_avg ? parseFloat(field.rating_avg) : 5.0;
+      document.getElementById('rating-avg').textContent = rating.toFixed(1);
+      document.getElementById('review-count').textContent = `(${field.review_count || 0} Ulasan)`;
+      
+      let starHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        starHtml += `<i class="bi ${i <= Math.round(rating) ? 'bi-star-fill' : 'bi-star'}"></i>`;
+      }
+      document.getElementById('stars-container').innerHTML = starHtml;
+
+      // Render Gallery
+      const galleryInner = document.getElementById('gallery-inner');
+      if (galeri.length > 0) {
+        galleryInner.innerHTML = '';
+        galeri.forEach((photo, idx) => {
+          const item = document.createElement('div');
+          item.className = `carousel-item ${idx === 0 ? 'active' : ''}`;
+          item.innerHTML = `<img src="${BASE_URL}/uploads/lapangan/${photo.foto}" class="d-block w-100 object-fit-cover rounded" style="height: 400px;" alt="${field.nama}">`;
+          galleryInner.appendChild(item);
+        });
+      }
+
+      // Render Facilities
+      const facContainer = document.getElementById('facilities-container');
+      facContainer.innerHTML = '';
+      if (fasilitas.length > 0) {
+        fasilitas.forEach(f => {
+          const chip = document.createElement('div');
+          chip.className = 'col-6 col-md-3';
+          chip.innerHTML = `
+            <div class="p-3 border rounded d-flex align-items-center gap-2 bg-light">
+              <i class="bi ${f.icon} text-primary fs-4"></i>
+              <span class="fw-semibold text-secondary">${f.nama}</span>
+            </div>
+          `;
+          facContainer.appendChild(chip);
+        });
+      } else {
+        facContainer.innerHTML = `<p class="text-muted">Tidak ada informasi fasilitas khusus.</p>`;
+      }
+
+      // Load reviews
+      loadReviews();
+    }
+
+    async function loadReviews() {
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/review?lapangan_id=${fieldId}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderReviews(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderReviews(reviews) {
+      const container = document.getElementById('reviews-list-container');
+      if (reviews.length === 0) {
+        container.innerHTML = `<p class="text-muted">Belum ada ulasan untuk lapangan olahraga ini.</p>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      reviews.forEach(r => {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+          stars += `<i class="bi ${i <= r.rating ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}"></i>`;
+        }
+        
+        const reviewEl = document.createElement('div');
+        reviewEl.className = 'border-bottom pb-4 mb-4';
+        const userPhoto = r.foto_user ? `${BASE_URL}/uploads/users/${r.foto_user}` : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
+        
+        let photoHtml = '';
+        if (r.foto) {
+          photoHtml = `
+            <div class="mt-2">
+              <img src="${BASE_URL}/uploads/review/${r.foto}" class="rounded border" style="max-height: 120px;" alt="Review Photo">
+            </div>
+          `;
+        }
+
+        reviewEl.innerHTML = `
+          <div class="d-flex align-items-start gap-3">
+            <img src="${userPhoto}" class="rounded-circle border" width="48" height="48">
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="fw-bold mb-0 text-dark">${r.nama_user}</h6>
+                <small class="text-muted">${App.formatDate(r.created_at)}</small>
+              </div>
+              <div class="mb-2">${stars}</div>
+              <p class="text-secondary small mb-1">${r.komentar || 'Ulasan tanpa komentar.'}</p>
+              ${photoHtml}
+            </div>
+          </div>
+        `;
+        container.appendChild(reviewEl);
+      });
+    }
+
+    async function loadScheduleGrid() {
+      const dateStr = document.getElementById('booking-date').value;
+      if (!dateStr) return;
+
+      const container = document.getElementById('slots-grid');
+      container.innerHTML = `
+        <div class="text-center py-4 w-100">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Memuat slot jadwal...</p>
+        </div>
+      `;
+
+      try {
+        const response = await fetch(`${BASE_URL}/api/v1/lapangan/${fieldId}/slots?tanggal=${dateStr}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderScheduleGrid(res.data);
+        } else {
+          container.innerHTML = `<div class="text-center py-4 text-danger w-100"><i class="bi bi-exclamation-octagon fs-4 mb-2 d-block"></i>Gagal memuat jadwal operasional.</div>`;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderScheduleGrid(slots) {
+      const container = document.getElementById('slots-grid');
+      container.innerHTML = '';
+      selectedSlots = [];
+      updateSummary();
+
+      if (slots.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-muted w-100"><i class="bi bi-calendar-x fs-4 mb-2 d-block"></i>Cabang olahraga tutup/tidak beroperasi pada hari ini.</div>`;
+        return;
+      }
+
+      slots.forEach(slot => {
+        const item = document.createElement('div');
+        const statusClass = slot.status.toLowerCase().replace(/ /g, '-');
+        item.className = `slot-item ${statusClass}`;
+        item.innerHTML = `
+          <div class="fw-bold text-dark mb-1" style="font-size: 14px;">${slot.jam_mulai} - ${slot.jam_selesai}</div>
+          <small class="text-primary fw-semibold">${App.formatRupiah(slot.harga)}</small>
+        `;
+
+        if (slot.status === 'Tersedia') {
+          item.addEventListener('click', () => {
+            toggleSlotSelect(item, slot);
+          });
+        }
+        container.appendChild(item);
+      });
+    }
+
+    function toggleSlotSelect(element, slot) {
+      const idx = selectedSlots.findIndex(s => s.jam_mulai === slot.jam_mulai);
+      if (idx > -1) {
+        selectedSlots.splice(idx, 1);
+        element.classList.remove('selected');
+      } else {
+        selectedSlots.push(slot);
+        element.classList.add('selected');
+      }
+      
+      // Sort selection by start time
+      selectedSlots.sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai));
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const summaryDate = document.getElementById('summary-date');
+      const summaryTime = document.getElementById('summary-time');
+      const summaryPrice = document.getElementById('summary-price');
+      const dateStr = document.getElementById('booking-date').value;
+
+      if (selectedSlots.length === 0) {
+        summaryDate.textContent = '-';
+        summaryTime.textContent = '-';
+        summaryPrice.textContent = 'Rp 0';
+        return;
+      }
+
+      summaryDate.textContent = App.formatDate(dateStr);
+
+      // Verify sequence is contiguous
+      let isContiguous = true;
+      for (let i = 0; i < selectedSlots.length - 1; i++) {
+        const nextStart = selectedSlots[i+1].jam_mulai;
+        const currentEnd = selectedSlots[i].jam_selesai;
+        if (nextStart !== currentEnd) {
+          isContiguous = false;
+        }
+      }
+
+      const warningText = document.querySelector('.alert-info');
+      if (!isContiguous) {
+        warningText.className = 'alert alert-danger py-2 small';
+        warningText.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>Peringatan: Slot waktu terpilih tidak berurutan! Jadwal harus berurutan.';
+      } else {
+        warningText.className = 'alert alert-info py-2 small';
+        warningText.innerHTML = '<i class="bi bi-info-circle me-1"></i>Pilih minimal 1 slot waktu yang berurutan.';
+      }
+
+      const start = selectedSlots[0].jam_mulai;
+      const end = selectedSlots[selectedSlots.length - 1].jam_selesai;
+      summaryTime.textContent = `${start} - ${end} (${selectedSlots.length * 0.5} jam)`;
+
+      const totalPrice = selectedSlots.reduce((sum, slot) => sum + parseFloat(slot.harga), 0);
+      summaryPrice.textContent = App.formatRupiah(totalPrice);
+    }
+
+    function proceedCheckout() {
+      if (selectedSlots.length === 0) {
+        App.showAlert('Pilihan Kosong', 'Silakan pilih minimal 1 slot waktu terlebih dahulu.', 'warning');
+        return;
+      }
+
+      // Check contiguous selection
+      let isContiguous = true;
+      for (let i = 0; i < selectedSlots.length - 1; i++) {
+        if (selectedSlots[i+1].jam_mulai !== selectedSlots[i].jam_selesai) {
+          isContiguous = false;
+        }
+      }
+
+      if (!isContiguous) {
+        App.showAlert('Waktu Tidak Berurutan', 'Jadwal booking harus berurutan dan tidak boleh terputus.', 'warning');
+        return;
+      }
+
+      if (!Auth.isAuthenticated()) {
+        Swal.fire({
+          title: 'Perlu Login',
+          text: 'Silakan login terlebih dahulu untuk melakukan booking.',
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonText: 'Masuk Akun',
+          cancelButtonText: 'Batal',
+          customClass: {
+            confirmButton: 'btn btn-primary px-4 me-3 rounded',
+            cancelButton: 'btn btn-outline-secondary px-4 rounded'
+          },
+          buttonsStyling: false
+        }).then((res) => {
+          if (res.isConfirmed) {
+            window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          }
+        });
+        return;
+      }
+
+      // Check role limits
+      if (Auth.getUser().role !== 'customer') {
+        App.showAlert('Akses Dibatasi', 'Hanya akun bertipe Customer yang diperbolehkan membooking lapangan.', 'warning');
+        return;
+      }
+
+      const dateStr = document.getElementById('booking-date').value;
+      const start = selectedSlots[0].jam_mulai;
+      const end = selectedSlots[selectedSlots.length - 1].jam_selesai;
+
+      window.location.href = `/customer/booking.html?id=${fieldId}&date=${dateStr}&start=${start}&end=${end}`;
+    }
+
+    async function checkWishlistStatus() {
+      if (!Auth.isAuthenticated()) return;
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/wishlist`);
+        if (response.ok) {
+          const res = await response.json();
+          const wishBtn = document.getElementById('wishlist-btn');
+          const isWish = res.data.some(w => w.lapangan_id === fieldId);
+          
+          if (isWish) {
+            wishBtn.className = 'btn btn-danger btn-sm rounded';
+            wishBtn.innerHTML = '<i class="bi bi-heart-fill"></i> Disukai';
+            // Store wishlist item ID
+            const item = res.data.find(w => w.lapangan_id === fieldId);
+            wishBtn.setAttribute('data-wishlist-id', item.id);
+          } else {
+            wishBtn.className = 'btn btn-outline-danger btn-sm rounded';
+            wishBtn.innerHTML = '<i class="bi bi-heart"></i> Favorit';
+            wishBtn.removeAttribute('data-wishlist-id');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function toggleWishlist() {
+      if (!Auth.isAuthenticated()) {
+        App.showAlert('Akses Terbatas', 'Silakan login terlebih dahulu untuk menyimpan favorit.', 'info');
+        return;
+      }
+
+      const wishBtn = document.getElementById('wishlist-btn');
+      const wishlistId = wishBtn.getAttribute('data-wishlist-id');
+
+      try {
+        if (wishlistId) {
+          // Delete
+          const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/wishlist/${wishlistId}`, {
+            method: 'DELETE'
+          });
+          if (response.ok) {
+            App.showToast('Dihapus dari wishlist', 'success');
+            checkWishlistStatus();
+          }
+        } else {
+          // Add
+          const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/wishlist`, {
+            method: 'POST',
+            body: JSON.stringify({ lapangan_id: fieldId })
+          });
+          if (response.ok) {
+            App.showToast('Ditambahkan ke wishlist', 'success');
+            checkWishlistStatus();
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Booking Mitra - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <!-- Mobile Top Bar -->
+    <div class="admin-topbar">
+      <button id="sidebar-toggle-btn" class="btn btn-sm btn-outline-secondary rounded">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+      <a href="/" class="d-flex align-items-center text-decoration-none">
+        <i class="bi bi-lightning-fill text-primary me-1"></i>
+        <span class="fw-bold" style="color:var(--primary-color)">Arena<span style="color:var(--text-dark)">Go</span></span>
+      </a>
+    </div>
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Pemesanan Lapangan</h1>
+          <p class="text-muted">Pantau status pesanan sewa masuk, ubah status bermain, dan batalkan pemesanan.</p>
+        </div>
+      </div>
+
+      <!-- Filters Panel -->
+      <div class="premium-card p-3 bg-white mb-4 shadow-sm">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label for="filter-status" class="form-label fw-bold text-secondary small">Filter Status</label>
+            <select class="form-select" id="filter-status" onchange="loadBookingsTable()">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending (Menunggu Bayar)</option>
+              <option value="waiting_verification">Menunggu Verifikasi</option>
+              <option value="approved">Disetujui (Lunas)</option>
+              <option value="checked_in">Checked In (Di Lokasi)</option>
+              <option value="playing">Sedang Bermain</option>
+              <option value="completed">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
+              <option value="rejected">Ditolak</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filter-date" class="form-label fw-bold text-secondary small">Tanggal Booking</label>
+            <input type="date" class="form-control" id="filter-date" onchange="loadBookingsTable()">
+          </div>
+          <div class="col-md-4">
+            <label for="search-code" class="form-label fw-bold text-secondary small">Cari Kode Pemesanan</label>
+            <input type="text" class="form-control" id="search-code" placeholder="GO-XXXXXXXX..." oninput="loadBookingsTable()">
+          </div>
+          <div class="col-md-2">
+            <button onclick="resetFilters()" class="btn btn-outline-secondary w-100 fw-bold py-2"><i class="bi bi-arrow-clockwise"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings Table -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Kode</th>
+              <th>Customer</th>
+              <th>Lapangan / Cabang</th>
+              <th>Jadwal Bermain</th>
+              <th class="text-end">Total</th>
+              <th>Status Booking</th>
+              <th class="text-end">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-table-body">
+            <tr>
+              <td colspan="7" class="text-center text-muted">Memuat data pemesanan lapangan...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['mitra']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBookingsTable();
+    });
+
+    async function loadBookingsTable() {
+      const status = document.getElementById('filter-status').value;
+      const tanggal = document.getElementById('filter-date').value;
+      const kode_booking = document.getElementById('search-code').value.trim();
+
+      const params = new URLSearchParams();
+      if (status) params.append('status', status);
+      if (tanggal) params.append('tanggal', tanggal);
+      if (kode_booking) params.append('kode_booking', kode_booking);
+
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking?${params.toString()}`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTable(Array.isArray(res.data) ? res.data : []);
+        }
+      } catch (err) {
+        console.error(err);
+        renderTable([]);
+      }
+    }
+
+    function renderTable(bookings) {
+      const tbody = document.getElementById('bookings-table-body');
+      tbody.innerHTML = '';
+
+      if (!bookings || bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">
+          <i class="bi bi-calendar-x fs-1 d-block mb-2 opacity-50"></i>
+          <p class="fw-semibold">Belum ada pemesanan masuk</p>
+          <small>Pemesanan dari customer akan muncul di sini.</small>
+        </td></tr>`;
+        return;
+      }
+
+      bookings.forEach(b => {
+        const row = document.createElement('tr');
+        
+        let actions = '';
+        if (b.status === 'waiting_verification') {
+          actions = `<a href="/mitra/pembayaran.html?booking_id=${b.id}" class="btn btn-sm btn-outline-warning rounded fw-bold"><i class="bi bi-wallet2"></i> Verifikasi</a>`;
+        } else if (b.status === 'approved') {
+          actions = `
+            <button onclick="updateBookingStatus('${b.id}', 'playing')" class="btn btn-sm btn-outline-primary rounded me-1 fw-bold"><i class="bi bi-play-fill"></i> Mulai</button>
+            <button onclick="updateBookingStatus('${b.id}', 'cancelled')" class="btn btn-sm btn-outline-danger rounded fw-bold">Cancel</button>
+          `;
+        } else if (b.status === 'checked_in') {
+          actions = `
+            <button onclick="updateBookingStatus('${b.id}', 'playing')" class="btn btn-sm btn-outline-primary rounded me-1 fw-bold"><i class="bi bi-play-fill"></i> Main</button>
+          `;
+        } else if (b.status === 'playing') {
+          actions = `
+            <button onclick="updateBookingStatus('${b.id}', 'completed')" class="btn btn-sm btn-outline-success rounded fw-bold"><i class="bi bi-check-circle-fill"></i> Selesai</button>
+          `;
+        } else {
+          actions = `<span class="text-muted small">No Action</span>`;
+        }
+
+        row.innerHTML = `
+          <td><strong class="text-primary">${b.kode_booking}</strong></td>
+          <td>
+            <div class="small">
+              <strong>${b.nama_user}</strong>
+              <div class="text-muted" style="font-size: 11px;">HP: ${b.no_hp_user || '-'}</div>
+            </div>
+          </td>
+          <td>
+            <div class="small">
+              <strong>${b.nama_lapangan}</strong>
+              <div class="text-muted" style="font-size: 11px;">${b.nama_cabang}</div>
+            </div>
+          </td>
+          <td>
+            <div class="small">
+              <strong>${App.formatDate(b.tanggal)}</strong>
+              <div class="text-muted" style="font-size: 11px;"><i class="bi-clock"></i> ${b.jam_mulai.slice(0, 5)} - ${b.jam_selesai.slice(0, 5)} (${b.durasi} jam)</div>
+            </div>
+          </td>
+          <td class="text-end fw-bold text-dark">${App.formatRupiah(parseFloat(b.total))}</td>
+          <td>
+            <span class="badge-status ${b.status}">${b.status.replace('_', ' ')}</span>
+          </td>
+          <td class="text-end">${actions}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function updateBookingStatus(bookingId, nextStatus) {
+      const verb = nextStatus === 'playing' ? 'memulai sesi bermain' : nextStatus === 'completed' ? 'menyelesaikan sewa' : 'membatalkan sewa';
+      App.showConfirm('Ubah Status', `Apakah Anda yakin ingin ${verb} untuk pemesanan ini?`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${bookingId}/status`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: nextStatus, catatan: `Status diubah menjadi ${nextStatus} oleh pemilik lapangan` })
+            });
+            App.hideLoader();
+
+            if (response.ok) {
+              App.showToast(`Status sewa berhasil diubah menjadi ${nextStatus}`, 'success');
+              loadBookingsTable();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-date').value = '';
+      document.getElementById('search-code').value = '';
+      loadBookingsTable();
+    }
+  </script>
+</body>
+</html>

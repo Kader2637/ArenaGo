@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Pemesanan - ArenaGo Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <!-- Mobile Top Bar -->
+    <div class="admin-topbar">
+      <button id="sidebar-toggle-btn" class="btn btn-sm btn-outline-secondary rounded">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+      <a href="/" class="d-flex align-items-center text-decoration-none">
+        <i class="bi bi-lightning-fill text-primary me-1"></i>
+        <span class="fw-bold" style="color:var(--primary-color)">Arena<span style="color:var(--text-dark)">Go</span></span>
+      </a>
+    </div>
+    <!-- Sidebar Placeholder -->
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Pemesanan</h1>
+          <p class="text-muted mb-0">Verifikasi pembayaran dan kelola status pemesanan pelanggan.</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="premium-card p-3 bg-white mb-4 shadow-sm">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-4">
+            <input type="text" class="form-control" id="search-input" placeholder="Cari kode booking / nama customer...">
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" id="status-filter">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending</option>
+              <option value="waiting_payment">Menunggu Pembayaran</option>
+              <option value="waiting_verification">Menunggu Verifikasi</option>
+              <option value="approved">Disetujui</option>
+              <option value="rejected">Ditolak</option>
+              <option value="completed">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
+            </select>
+          </div>
+          <div class="col-md-auto">
+            <button class="btn btn-primary rounded fw-semibold" onclick="loadBookings()">
+              <i class="bi bi-search me-1"></i> Filter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings Table -->
+      <div class="premium-card bg-white shadow-sm overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light border-bottom">
+              <tr>
+                <th class="ps-4 py-3 text-muted fw-semibold small text-uppercase">Kode Booking</th>
+                <th class="py-3 text-muted fw-semibold small text-uppercase">Customer</th>
+                <th class="py-3 text-muted fw-semibold small text-uppercase">Lapangan</th>
+                <th class="py-3 text-muted fw-semibold small text-uppercase">Tanggal & Jam</th>
+                <th class="py-3 text-muted fw-semibold small text-uppercase">Total</th>
+                <th class="py-3 text-muted fw-semibold small text-uppercase">Status</th>
+                <th class="py-3 text-muted fw-semibold small text-uppercase">Bukti Bayar</th>
+                <th class="pe-4 py-3 text-muted fw-semibold small text-uppercase">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-table-body">
+              <tr>
+                <td colspan="8" class="text-center py-5 text-muted">
+                  <div class="spinner-border spinner-border-sm text-primary me-2"></div> Memuat data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Verifikasi Pembayaran -->
+  <div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Verifikasi Pembayaran</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-4" id="bukti-preview-container">
+            <p class="text-muted small">Tidak ada bukti transfer diunggah.</p>
+          </div>
+          <div class="bg-light rounded p-3 mb-3" id="booking-verify-detail">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary small">Catatan Admin (opsional)</label>
+            <textarea class="form-control" id="verify-catatan" rows="2" placeholder="Misal: Nominal sesuai, disetujui."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 gap-2">
+          <button class="btn btn-outline-danger rounded fw-semibold" onclick="doVerify('rejected')">
+            <i class="bi bi-x-circle me-1"></i> Tolak
+          </button>
+          <button class="btn btn-success rounded fw-semibold" onclick="doVerify('verified')">
+            <i class="bi bi-check-circle me-1"></i> Setujui Pembayaran
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Ubah Status Booking -->
+  <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Ubah Status Pemesanan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small mb-3" id="status-modal-info"></p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary small">Status Baru</label>
+            <select class="form-select" id="new-status">
+              <option value="approved">Disetujui</option>
+              <option value="cancelled">Dibatalkan</option>
+              <option value="completed">Selesai</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary small">Catatan (opsional)</label>
+            <textarea class="form-control" id="status-catatan" rows="2" placeholder="Alasan perubahan status..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+          <button class="btn btn-primary rounded fw-semibold" onclick="doChangeStatus()">
+            <i class="bi bi-check2 me-1"></i> Simpan Status
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['admin_sistem']);
+
+    let currentBookingId = null;
+    let verifyModal, statusModal;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      verifyModal = new bootstrap.Modal(document.getElementById('verifyModal'));
+      statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+      loadBookings();
+
+      document.getElementById('search-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') loadBookings();
+      });
+    });
+
+    async function loadBookings() {
+      const status = document.getElementById('status-filter').value;
+      const search = document.getElementById('search-input').value.trim();
+
+      const tbody = document.getElementById('bookings-table-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div> Memuat...</td></tr>`;
+
+      try {
+        let url = `${BASE_URL}/api/v1/booking?limit=100`;
+        if (status) url += `&status=${status}`;
+
+        const res = await Auth.fetchWithAuth(url);
+        const data = await res.json();
+
+        const bookings = Array.isArray(data.data) ? data.data : (data.data?.bookings || []);
+
+        if (!data.success || !bookings.length) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1 d-block mb-2"></i>Belum ada data pemesanan.</td></tr>`;
+          return;
+        }
+
+        let filteredBookings = bookings;
+        if (search) {
+          const q = search.toLowerCase();
+          filteredBookings = bookings.filter(b =>
+            b.kode_booking.toLowerCase().includes(q) ||
+            (b.nama_user || '').toLowerCase().includes(q)
+          );
+        }
+
+        tbody.innerHTML = filteredBookings.map(b => `
+          <tr>
+            <td class="ps-4">
+              <span class="fw-bold text-primary small">${b.kode_booking}</span>
+            </td>
+            <td>
+              <span class="fw-semibold">${b.nama_user || '-'}</span><br>
+              <small class="text-muted">${b.email_user || ''}</small>
+            </td>
+            <td>
+              <span class="fw-semibold small">${b.nama_lapangan || '-'}</span><br>
+              <small class="text-muted">${b.nama_cabang || ''}</small>
+            </td>
+            <td>
+              <span class="small fw-semibold">${App.formatDate(b.tanggal)}</span><br>
+              <small class="text-muted">${b.jam_mulai} - ${b.jam_selesai}</small>
+            </td>
+            <td class="fw-bold text-dark">${App.formatRupiah(parseFloat(b.total))}</td>
+            <td><span class="badge-status ${b.status}">${formatStatus(b.status)}</span></td>
+            <td>
+              ${b.bukti_pembayaran
+                ? `<a href="${BASE_URL}/uploads/payments/${b.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-primary rounded"><i class="bi bi-image me-1"></i>Lihat</a>`
+                : '<span class="text-muted small">—</span>'
+              }
+            </td>
+            <td class="pe-4">
+              <div class="d-flex gap-1">
+                ${b.status === 'waiting_verification'
+                  ? `<button class="btn btn-sm btn-success rounded fw-semibold" onclick="openVerify('${b.id}', '${b.kode_booking}', '${b.nama_user}', '${App.formatRupiah(parseFloat(b.total))}', '${b.bukti_pembayaran || ''}')">
+                      <i class="bi bi-shield-check me-1"></i>Verifikasi
+                    </button>`
+                  : ''
+                }
+                <button class="btn btn-sm btn-outline-secondary rounded" onclick="openChangeStatus('${b.id}', '${b.kode_booking}', '${b.status}')">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-danger">Gagal memuat data.</td></tr>`;
+      }
+    }
+
+    function formatStatus(s) {
+      const map = {
+        pending: 'Pending', waiting_payment: 'Menunggu Bayar',
+        waiting_verification: 'Menunggu Verifikasi', approved: 'Disetujui',
+        rejected: 'Ditolak', completed: 'Selesai', cancelled: 'Dibatalkan',
+        checked_in: 'Check-In', playing: 'Sedang Bermain'
+      };
+      return map[s] || s;
+    }
+
+    function openVerify(bookingId, kode, nama, total, bukti) {
+      currentBookingId = bookingId;
+      document.getElementById('verify-catatan').value = '';
+      document.getElementById('booking-verify-detail').innerHTML = `
+        <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Kode Booking</span><strong class="small">${kode}</strong></div>
+        <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Customer</span><strong class="small">${nama}</strong></div>
+        <div class="d-flex justify-content-between"><span class="text-muted small">Total Pembayaran</span><strong class="small text-primary">${total}</strong></div>
+      `;
+      const previewContainer = document.getElementById('bukti-preview-container');
+      if (bukti) {
+        previewContainer.innerHTML = `
+          <p class="text-muted small mb-2">Bukti Transfer Diunggah:</p>
+          <a href="${BASE_URL}/uploads/payments/${bukti}" target="_blank">
+            <img src="${BASE_URL}/uploads/payments/${bukti}" class="img-thumbnail" style="max-height:200px;" alt="Bukti Pembayaran">
+          </a>
+        `;
+      } else {
+        previewContainer.innerHTML = `<p class="text-muted small">Tidak ada bukti transfer diunggah.</p>`;
+      }
+      verifyModal.show();
+    }
+
+    async function doVerify(action) {
+      if (!currentBookingId) return;
+      const catatan = document.getElementById('verify-catatan').value.trim();
+      App.showLoader();
+      try {
+        const res = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${currentBookingId}/verify-payment`, {
+          method: 'POST',
+          body: JSON.stringify({ status_pembayaran: action, catatan })
+        });
+        App.hideLoader();
+        verifyModal.hide();
+        const data = await res.json();
+        if (data.success) {
+          App.showAlert(action === 'verified' ? 'Pembayaran Disetujui!' : 'Pembayaran Ditolak', data.message, action === 'verified' ? 'success' : 'warning').then(() => loadBookings());
+        } else {
+          App.showAlert('Gagal', data.message, 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        App.showAlert('Error', 'Gagal memproses verifikasi.', 'error');
+      }
+    }
+
+    function openChangeStatus(bookingId, kode, currentStatus) {
+      currentBookingId = bookingId;
+      document.getElementById('status-modal-info').textContent = `Booking: ${kode} | Status saat ini: ${formatStatus(currentStatus)}`;
+      document.getElementById('status-catatan').value = '';
+      statusModal.show();
+    }
+
+    async function doChangeStatus() {
+      if (!currentBookingId) return;
+      const status = document.getElementById('new-status').value;
+      const catatan = document.getElementById('status-catatan').value.trim();
+      App.showLoader();
+      try {
+        const res = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/booking/${currentBookingId}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status, catatan })
+        });
+        App.hideLoader();
+        statusModal.hide();
+        const data = await res.json();
+        if (data.success) {
+          App.showAlert('Status Diperbarui!', data.message, 'success').then(() => loadBookings());
+        } else {
+          App.showAlert('Gagal', data.message, 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        App.showAlert('Error', 'Gagal mengubah status.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

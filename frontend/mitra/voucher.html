@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Voucher Promo - ArenaGo</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="admin-wrapper">
+    <div id="sidebar-placeholder"></div>
+
+    <div class="admin-content">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="fw-bold mb-1 text-dark">Kelola Voucher Promo</h1>
+          <p class="text-muted">Buat kode voucher untuk memicu daya tarik pembooking lapangan Anda.</p>
+        </div>
+        <button class="btn btn-primary rounded fw-bold gradient-btn" onclick="openAddVoucherModal()"><i class="bi bi-plus-lg"></i> Buat Voucher</button>
+      </div>
+
+      <!-- Vouchers Table -->
+      <div class="premium-card p-4 bg-white shadow-sm">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Kode Promo</th>
+              <th>Potongan Diskon</th>
+              <th>Rentang Tanggal Berlaku</th>
+              <th>Minimal Pembelanjaan</th>
+              <th>Status</th>
+              <th class="text-end">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="vouchers-table-body">
+            <tr>
+              <td colspan="6" class="text-center text-muted">Memuat data voucher promo...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Voucher Modal Popup -->
+  <div class="modal fade" id="voucherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+      <div class="modal-content premium-card border-0">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold mb-0" id="voucher-modal-title">Buat Voucher Promo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="voucher-form">
+          <div class="modal-body p-4">
+            <input type="hidden" id="voucher-id">
+
+            <div class="mb-3">
+              <label for="v-kode" class="form-label fw-bold text-secondary">Kode Promo (Caps)</label>
+              <input type="text" class="form-control text-uppercase" id="v-kode" placeholder="Contoh: ARENAGO20" required>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-8">
+                <label for="v-diskon" class="form-label fw-bold text-secondary">Besar Diskon</label>
+                <input type="number" class="form-control" id="v-diskon" placeholder="Nilai" required>
+              </div>
+              <div class="col-4">
+                <label for="v-tipe" class="form-label fw-bold text-secondary">Tipe</label>
+                <select class="form-select" id="v-tipe">
+                  <option value="nominal" selected>Nominal (Rp)</option>
+                  <option value="persen">Persen (%)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label for="v-start" class="form-label fw-bold text-secondary">Tanggal Mulai</label>
+                <input type="date" class="form-control" id="v-start" required>
+              </div>
+              <div class="col-6">
+                <label for="v-end" class="form-label fw-bold text-secondary">Tanggal Selesai</label>
+                <input type="date" class="form-control" id="v-end" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="v-min" class="form-label fw-bold text-secondary">Minimal Transaksi (Subtotal)</label>
+              <input type="number" class="form-control" id="v-min" placeholder="Rp" value="0" required>
+            </div>
+
+            <div class="mb-2" id="status-row">
+              <label for="v-status" class="form-label fw-bold text-secondary">Status Voucher</label>
+              <select class="form-select" id="v-status">
+                <option value="aktif" selected>Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary rounded gradient-btn fw-bold px-4">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    Auth.guard(['mitra']);
+
+    let voucherModalObj = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      voucherModalObj = new bootstrap.Modal(document.getElementById('voucherModal'));
+      loadVouchersTable();
+
+      document.getElementById('voucher-form').addEventListener('submit', handleVoucherSubmit);
+    });
+
+    async function loadVouchersTable() {
+      try {
+        const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/voucher`);
+        if (response.ok) {
+          const res = await response.json();
+          renderTable(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderTable(vouchers) {
+      const tbody = document.getElementById('vouchers-table-body');
+      tbody.innerHTML = '';
+
+      if (vouchers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Belum ada voucher promo dibuat. Klik Buat Voucher untuk membuat promo baru.</td></tr>`;
+        return;
+      }
+
+      vouchers.forEach(v => {
+        const row = document.createElement('tr');
+        
+        const discValText = v.tipe_diskon === 'persen' ? `${parseInt(v.diskon)}%` : App.formatRupiah(parseFloat(v.diskon));
+        const datesText = `${App.formatDate(v.tanggal_mulai)} s/d ${App.formatDate(v.tanggal_selesai)}`;
+
+        row.innerHTML = `
+          <td><strong class="text-dark fs-5">${v.kode}</strong></td>
+          <td><span class="badge bg-primary-subtle text-primary py-2 px-3 fw-bold">${discValText}</span></td>
+          <td><small class="text-muted">${datesText}</small></td>
+          <td><small class="text-secondary">${App.formatRupiah(parseFloat(v.minimal_transaksi))}</small></td>
+          <td>
+            <span class="badge ${v.status === 'aktif' ? 'bg-success' : 'bg-danger'}">${v.status}</span>
+          </td>
+          <td class="text-end">
+            <button onclick="openEditVoucherModal('${v.id}', '${v.kode}', '${v.diskon}', '${v.tipe_diskon}', '${v.tanggal_mulai.slice(0, 10)}', '${v.tanggal_selesai.slice(0, 10)}', '${v.minimal_transaksi}', '${v.status}')" class="btn btn-sm btn-outline-primary rounded me-1" title="Ubah"><i class="bi bi-pencil"></i></button>
+            <button onclick="deleteVoucher('${v.id}', '${v.kode}')" class="btn btn-sm btn-outline-danger rounded" title="Hapus"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function openAddVoucherModal() {
+      document.getElementById('voucher-modal-title').textContent = 'Buat Voucher Promo';
+      document.getElementById('voucher-id').value = '';
+      document.getElementById('v-kode').value = '';
+      document.getElementById('v-kode').disabled = false;
+      document.getElementById('v-diskon').value = '';
+      document.getElementById('v-tipe').value = 'nominal';
+      document.getElementById('v-start').value = new Date().toISOString().split('T')[0];
+      document.getElementById('v-end').value = '';
+      document.getElementById('v-min').value = '0';
+      document.getElementById('status-row').classList.add('d-none');
+      
+      voucherModalObj.show();
+    }
+
+    function openEditVoucherModal(id, kode, diskon, tipe, start, end, min, status) {
+      document.getElementById('voucher-modal-title').textContent = 'Ubah Voucher Promo';
+      document.getElementById('voucher-id').value = id;
+      document.getElementById('v-kode').value = kode;
+      document.getElementById('v-kode').disabled = true;
+      document.getElementById('v-diskon').value = parseInt(diskon);
+      document.getElementById('v-tipe').value = tipe;
+      document.getElementById('v-start').value = start;
+      document.getElementById('v-end').value = end;
+      document.getElementById('v-min').value = parseInt(min);
+      document.getElementById('v-status').value = status;
+      document.getElementById('status-row').classList.remove('d-none');
+
+      voucherModalObj.show();
+    }
+
+    async function handleVoucherSubmit(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('voucher-id').value;
+      const payload = {
+        diskon: parseFloat(document.getElementById('v-diskon').value),
+        tipe_diskon: document.getElementById('v-tipe').value,
+        tanggal_mulai: document.getElementById('v-start').value,
+        tanggal_selesai: document.getElementById('v-end').value,
+        minimal_transaksi: parseFloat(document.getElementById('v-min').value),
+      };
+
+      if (id) {
+        payload.status = document.getElementById('v-status').value;
+      } else {
+        payload.kode = document.getElementById('v-kode').value.trim().toUpperCase();
+      }
+
+      App.showLoader();
+      try {
+        let response;
+        if (id) {
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/voucher/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/voucher`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+        App.hideLoader();
+
+        if (response.ok) {
+          voucherModalObj.hide();
+          App.showToast('Voucher berhasil disimpan', 'success');
+          loadVouchersTable();
+        } else {
+          const res = await response.json();
+          App.showAlert('Gagal Menyimpan', res.message || 'Gagal memproses voucher.', 'error');
+        }
+      } catch (err) {
+        App.hideLoader();
+        console.error(err);
+      }
+    }
+
+    async function deleteVoucher(id, kode) {
+      App.showConfirm('Hapus Voucher', `Apakah Anda yakin ingin menonaktifkan dan menghapus voucher ${kode}?`).then(async (res) => {
+        if (res.isConfirmed) {
+          App.showLoader();
+          try {
+            const response = await Auth.fetchWithAuth(`${BASE_URL}/api/v1/voucher/${id}`, {
+              method: 'DELETE'
+            });
+            App.hideLoader();
+            if (response.ok) {
+              App.showToast('Voucher berhasil dihapus', 'success');
+              loadVouchersTable();
+            }
+          } catch (err) {
+            App.hideLoader();
+            console.error(err);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

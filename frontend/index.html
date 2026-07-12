@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArenaGo - Sports Field Booking Marketplace</title>
+  <!-- CSS Vendors -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/assets/css/style.css?v=1.2" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
+
+  <!-- Hero Banner Section -->
+  <header class="hero-section text-white d-flex align-items-center">
+    <div class="container text-center text-lg-start position-relative z-3">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill mb-3">Penyewaan Lapangan Terlengkap</span>
+          <h1 class="display-3 fw-bold mb-3">Sewa Lapangan Olahraga Premium Mudah & Cepat</h1>
+          <p class="lead mb-4 text-white-50">Cari, bandingkan, dan sewa lapangan olahraga dari ribuan mitra terbaik di Indonesia. Futsal, Badminton, Basket, Tennis, dan hoki dalam satu aplikasi.</p>
+          <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3">
+            <a href="/customer/lapangan.html" class="btn btn-primary gradient-btn btn-lg px-4 py-3"><i class="bi bi-search me-2"></i>Mulai Cari Lapangan</a>
+            <a href="#cara-booking" class="btn btn-outline-light btn-lg px-4 py-3"><i class="bi bi-info-circle me-2"></i>Cara Pemesanan</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Filter Panel -->
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="search-box-container">
+          <form action="/customer/lapangan.html" method="GET" class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-secondary"><i class="bi bi-search me-1"></i>Nama Lapangan / Kategori</label>
+              <input type="text" name="search" class="form-control py-2" placeholder="Futsal, Badminton, Basket...">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold text-secondary"><i class="bi bi-geo-alt me-1"></i>Lokasi Kota</label>
+              <input type="text" name="kota" class="form-control py-2" placeholder="Malang, Surabaya, Batu...">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-bold text-secondary"><i class="bi bi-door-open me-1"></i>Tipe Lapangan</label>
+              <select name="tipe" class="form-select py-2">
+                <option value="">Semua Tipe</option>
+                <option value="indoor">Indoor</option>
+                <option value="outdoor">Outdoor</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary w-100 py-2 fw-bold gradient-btn"><i class="bi bi-funnel"></i> Cari</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Section -->
+  <section class="py-5 mt-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Pilih Kategori Olahraga</h2>
+        <p class="text-muted">Jelajahi lapangan berdasarkan cabang olahraga favorit Anda</p>
+      </div>
+      
+      <div class="row g-4" id="categories-list">
+        <!-- Skeletons -->
+        <div class="col-6 col-md-3 col-lg-2 skeleton-holder">
+          <div class="category-card skeleton" style="height: 140px;"></div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 skeleton-holder">
+          <div class="category-card skeleton" style="height: 140px;"></div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 skeleton-holder">
+          <div class="category-card skeleton" style="height: 140px;"></div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 skeleton-holder">
+          <div class="category-card skeleton" style="height: 140px;"></div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 skeleton-holder">
+          <div class="category-card skeleton" style="height: 140px;"></div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 skeleton-holder">
+          <div class="category-card skeleton" style="height: 140px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promo Vouchers Section -->
+  <section class="bg-light py-5 border-top border-bottom">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="fw-bold mb-1">Promo Khusus Minggu Ini</h2>
+          <p class="text-muted mb-0">Gunakan kode voucher di bawah untuk mendapatkan diskon terbaik</p>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="premium-card p-4 border-start border-4 border-primary bg-white d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+              <span class="badge bg-primary mb-2">Diskon 20%</span>
+              <h5 class="fw-bold mb-1">KODE: MERDEKA20</h5>
+              <p class="text-muted small mb-0">Minimal transaksi Rp100.000</p>
+            </div>
+            <button onclick="navigator.clipboard.writeText('MERDEKA20'); App.showToast('Voucher disalin!', 'success')" class="btn btn-outline-primary btn-sm rounded"><i class="bi bi-copy"></i> Salin</button>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="premium-card p-4 border-start border-4 border-success bg-white d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+              <span class="badge bg-success mb-2">Diskon Rp50.000</span>
+              <h5 class="fw-bold mb-1">KODE: ARENAGO50K</h5>
+              <p class="text-muted small mb-0">Minimal transaksi Rp200.000</p>
+            </div>
+            <button onclick="navigator.clipboard.writeText('ARENAGO50K'); App.showToast('Voucher disalin!', 'success')" class="btn btn-outline-primary btn-sm rounded"><i class="bi bi-copy"></i> Salin</button>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 d-none d-lg-block">
+          <div class="premium-card p-4 border-start border-4 border-warning bg-white d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+              <span class="badge bg-warning text-dark mb-2">Member Baru</span>
+              <h5 class="fw-bold mb-1">KODE: HELLOGO</h5>
+              <p class="text-muted small mb-0">Tanpa minimal transaksi</p>
+            </div>
+            <button onclick="navigator.clipboard.writeText('HELLOGO'); App.showToast('Voucher disalin!', 'success')" class="btn btn-outline-primary btn-sm rounded"><i class="bi bi-copy"></i> Salin</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Fields Section -->
+  <section class="py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+          <h2 class="fw-bold mb-1">Lapangan Terpopuler</h2>
+          <p class="text-muted mb-0">Pilihan lapangan terbaik dengan rating tertinggi minggu ini</p>
+        </div>
+        <a href="/customer/lapangan.html" class="btn btn-outline-primary roundedfw-bold">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      <div class="row g-4" id="popular-fields-list">
+        <!-- Loading skeletons -->
+        <div class="col-md-4">
+          <div class="premium-card skeleton" style="height: 350px;"></div>
+        </div>
+        <div class="col-md-4">
+          <div class="premium-card skeleton" style="height: 350px;"></div>
+        </div>
+        <div class="col-md-4">
+          <div class="premium-card skeleton" style="height: 350px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it Works Section -->
+  <section id="cara-booking" class="bg-light py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Cara Booking Mudah di ArenaGo</h2>
+        <p class="text-muted">Ikuti 4 langkah mudah untuk mengamankan slot bermain Anda</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3 text-center">
+          <div class="premium-card p-4 h-100 bg-white shadow-sm border-0">
+            <div class="display-5 text-primary mb-3"><i class="bi bi-search"></i></div>
+            <h5 class="fw-bold">1. Cari Lapangan</h5>
+            <p class="text-muted small">Cari lapangan berdasarkan olahraga, nama, kota, atau tipe lapangan favorit.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 text-center">
+          <div class="premium-card p-4 h-100 bg-white shadow-sm border-0">
+            <div class="display-5 text-primary mb-3"><i class="bi bi-calendar-event"></i></div>
+            <h5 class="fw-bold">2. Pilih Jadwal</h5>
+            <p class="text-muted small">Pilih tanggal dan slot 30-menit yang tersedia di kalender secara real-time.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 text-center">
+          <div class="premium-card p-4 h-100 bg-white shadow-sm border-0">
+            <div class="display-5 text-primary mb-3"><i class="bi bi-wallet2"></i></div>
+            <h5 class="fw-bold">3. Lakukan Pembayaran</h5>
+            <p class="text-muted small">Gunakan voucher promo, lakukan transfer, lalu unggah bukti transaksi Anda.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 text-center">
+          <div class="premium-card p-4 h-100 bg-white shadow-sm border-0">
+            <div class="display-5 text-primary mb-3"><i class="bi bi-qr-code"></i></div>
+            <h5 class="fw-bold">4. Scan & Main</h5>
+            <p class="text-muted small">Tunjukkan QR code pemesanan kepada staff cabang saat tiba di lokasi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-5">
+    <div class="container" style="max-width: 800px;">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Pertanyaan yang Sering Diajukan (FAQ)</h2>
+        <p class="text-muted">Temukan jawaban atas kendala atau info seputar platform kami</p>
+      </div>
+
+      <div class="accordion accordion-flush" id="faqAccordion">
+        <div class="accordion-item border-bottom">
+          <h2 class="accordion-header" id="flush-headingOne">
+            <button class="accordion-button collapsed fw-semibold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne">
+              Bagaimana cara membatalkan pesanan lapangan?
+            </button>
+          </h2>
+          <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">Anda dapat membatalkan pesanan melalui halaman Riwayat Booking sebelum bukti transfer diunggah. Jika pembayaran telah disetujui, pembatalan dapat diproses sesuai kebijakan masing-masing mitra pemilik lapangan.</div>
+          </div>
+        </div>
+
+        <div class="accordion-item border-bottom">
+          <h2 class="accordion-header" id="flush-headingTwo">
+            <button class="accordion-button collapsed fw-semibold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo">
+              Berapa lama batas waktu pembayaran?
+            </button>
+          </h2>
+          <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">Batas waktu transfer pembayaran adalah 15 menit semenjak booking dibuat. Sistem akan membatalkan pemesanan secara otomatis jika melebihi batas waktu tersebut guna membebaskan jadwal untuk penyewa lain.</div>
+          </div>
+        </div>
+
+        <div class="accordion-item border-bottom">
+          <h2 class="accordion-header" id="flush-headingThree">
+            <button class="accordion-button collapsed fw-semibold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree">
+              Apakah bisa memesan lapangan untuk durasi 1,5 jam?
+            </button>
+          </h2>
+          <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">Ya, sistem slot ArenaGo berbasis per 30 menit. Anda bebas memilih rentang waktu berapapun selama minimal 30 menit (misalnya: 1 jam, 1,5 jam, 2 jam, dst).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- App JS -->
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHomeData();
+    });
+
+    async function loadHomeData() {
+      App.showLoader();
+      // 1. Fetch Categories stats
+      try {
+        const catRes = await fetch(`${BASE_URL}/api/v1/kategori/stats`);
+        if (catRes.ok) {
+          const res = await catRes.json();
+          renderCategories(res.data);
+        }
+      } catch (err) {
+        console.error('Error categories stats:', err);
+      }
+
+      // 2. Fetch Popular fields
+      try {
+        const fieldRes = await fetch(`${BASE_URL}/api/v1/lapangan?limit=3`);
+        if (fieldRes.ok) {
+          const res = await fieldRes.json();
+          renderPopularFields(res.data);
+        }
+      } catch (err) {
+        console.error('Error popular fields:', err);
+      }
+      App.hideLoader();
+    }
+
+    function renderCategories(categories) {
+      const container = document.getElementById('categories-list');
+      container.innerHTML = '';
+      
+      if (categories.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">Tidak ada kategori tersedia</div>`;
+        return;
+      }
+
+      categories.forEach(cat => {
+        const card = document.createElement('div');
+        card.className = 'col-6 col-md-4 col-lg-3';
+        card.innerHTML = `
+          <div class="category-card-premium text-white position-relative overflow-hidden rounded-4 shadow-sm" onclick="window.location.href='/customer/lapangan.html?kategori_id=${cat.id}'" style="cursor: pointer;">
+            <div class="category-card-bg" style="background-image: url('${BASE_URL}/uploads/${cat.gambar || 'default-sport.jpg'}')"></div>
+            <div class="category-card-overlay d-flex flex-column justify-content-end p-4">
+              <span class="category-card-icon-pill mb-2"><i class="${cat.icon || 'bi bi-activity'}"></i></span>
+              <h5 class="fw-bold mb-0 text-white">${cat.nama}</h5>
+              <p class="mb-0 text-white-50 small">${cat.jumlah_lapangan} Lapangan</p>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderPopularFields(fields) {
+      const container = document.getElementById('popular-fields-list');
+      container.innerHTML = '';
+
+      if (fields.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">Belum ada lapangan yang terdaftar</div>`;
+        return;
+      }
+
+      fields.forEach(field => {
+        const rating = field.rating_avg ? parseFloat(field.rating_avg) : 5.0;
+        let starHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starHtml += `<i class="bi ${i <= Math.round(rating) ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}"></i>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        const imageSrc = field.foto ? `${BASE_URL}/uploads/lapangan/${field.foto}` : 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&q=80&w=600';
+        
+        card.innerHTML = `
+          <div class="premium-card h-100 d-flex flex-column bg-white">
+            <div class="position-relative">
+              <img src="${imageSrc}" class="w-100 object-fit-cover" style="height: 220px;" alt="${field.nama}">
+              <span class="position-absolute top-0 end-0 bg-primary text-white badge m-3 px-3 py-2 text-capitalize shadow-sm">${field.tipe}</span>
+            </div>
+            <div class="p-4 d-flex flex-column flex-grow-1">
+              <span class="text-primary fw-semibold small text-uppercase mb-1"><i class="bi bi-tag-fill me-1"></i>${field.nama_kategori}</span>
+              <h5 class="fw-bold mb-2 text-dark">${field.nama}</h5>
+              <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1 text-danger"></i>${field.nama_cabang} - ${field.kota}</p>
+              
+              <div class="d-flex align-items-center mb-3">
+                <div class="me-2">${starHtml}</div>
+                <small class="text-muted">(${field.review_count || 0} Review)</small>
+              </div>
+              
+              <hr class="mt-auto mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted d-block">Mulai dari</small>
+                  <span class="text-primary fw-bold fs-5">${App.formatRupiah(parseFloat(field.harga_per_jam))}</span><small class="text-muted">/jam</small>
+                </div>
+                <a href="/customer/detail-lapangan.html?id=${field.id}" class="btn btn-primary rounded fw-bold gradient-btn">Pesan Lapangan</a>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Fix function name mismatch
+    window.loadHomeData = loadHomeData;
+  </script>
+</body>
+</html>

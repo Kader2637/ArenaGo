@@ -1,0 +1,52 @@
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top py-3">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center fw-bold text-primary fs-4" href="/">
+      <i class="bi bi-lightning-fill me-2"></i>Arena<span class="text-dark">Go</span>
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+        <li class="nav-item">
+          <a class="nav-link fw-semibold px-3" href="/"><i class="bi bi-house-door me-1"></i>Beranda</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold px-3" href="/customer/kategori.html"><i class="bi bi-grid me-1"></i>Kategori</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold px-3" href="/customer/lapangan.html"><i class="bi bi-search me-1"></i>Cari Lapangan</a>
+        </li>
+      </ul>
+      
+      <div class="d-flex align-items-center gap-2">
+        <!-- Guest Controls -->
+        <a href="/login.html" id="nav-login-btn" class="btn btn-outline-primary px-4 fw-semibold rounded me-2">Masuk</a>
+        <a href="/register.html" id="nav-register-btn" class="btn btn-primary premium-btn px-4 fw-semibold rounded gradient-btn">Daftar</a>
+
+        <!-- Authenticated Dropdown -->
+        <div class="dropdown d-none" id="nav-profile-dropdown">
+          <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle link-dark" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150" alt="Avatar" width="40" height="40" class="rounded-circle me-2 border border-2 border-primary" id="nav-user-avatar">
+            <div class="d-none d-md-block text-start">
+              <div class="fw-bold fs-6 lh-sm" id="nav-user-name">User</div>
+              <span class="badge bg-secondary text-capitalize" style="font-size: 10px;" id="nav-user-role">Customer</span>
+            </div>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2 rounded-3" aria-labelledby="dropdownUser" style="width: 220px;">
+            <li><h6 class="dropdown-header text-primary fw-bold">Menu Navigasi</h6></li>
+            <li><a class="dropdown-item rounded py-2 d-none" href="#" id="nav-dashboard-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+            <li><a class="dropdown-item rounded py-2 d-none" href="/customer/riwayat.html" id="nav-bookings-link"><i class="bi bi-calendar2-range me-2"></i>Riwayat Booking</a></li>
+            <li><a class="dropdown-item rounded py-2 d-none" href="/customer/riwayat.html?tab=wishlist" id="nav-fav-link"><i class="bi bi-heart me-2"></i>Wishlist Favorit</a></li>
+            <li><a class="dropdown-item rounded py-2" href="/customer/profile.html"><i class="bi bi-person me-2"></i>Profil Saya</a></li>
+            <li><a class="dropdown-item rounded py-2" href="/customer/riwayat.html?tab=notif"><i class="bi bi-bell me-2"></i>Notifikasi <span class="badge bg-danger rounded-pill float-end d-none" id="notif-badge">0</span></a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item rounded py-2 text-danger fw-semibold" href="#" id="nav-logout-btn"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
