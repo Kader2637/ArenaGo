@@ -20,8 +20,7 @@
       "dest": "/backend/app.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "handle": "filesystem"
     }
   ]
 }
