@@ -4,24 +4,11 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let folder = 'backend/uploads';
-    if (file.fieldname === 'foto_user') {
-      folder = 'backend/uploads/users';
-    } else if (file.fieldname === 'logo_mitra' || file.fieldname === 'banner_mitra') {
-      folder = 'backend/uploads/mitra';
-    } else if (file.fieldname === 'foto_lapangan' || file.fieldname === 'foto') {
-      folder = 'backend/uploads/lapangan';
-    } else if (file.fieldname === 'foto_review') {
-      folder = 'backend/uploads/review';
-    } else if (file.fieldname === 'bukti_pembayaran') {
-      folder = 'backend/uploads/payment';
-    }
-    
-    const dir = path.join(process.cwd(), folder);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
+    // Di Vercel, kita hanya bisa menulis ke direktori /tmp
+    // Kita akan tetap membuat subfolder di dalam /tmp untuk kerapian.
+    const uploadPath = path.join('/tmp', 'uploads');
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
