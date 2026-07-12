@@ -1,15 +1,18 @@
 {
   "name": "arenago",
   "version": "1.0.0",
-  "description": "Multi-Tenant Sports Field Booking Marketplace REST API",
+  "description": "ArenaGo Sports Field Booking Marketplace",
   "main": "backend/app.js",
+  "private": true,
   "scripts": {
     "start": "node backend/app.js",
-    "dev": "nodemon backend/app.js"
+    "dev": "nodemon backend/app.js",
+    "migrate": "node database/migrate.js",
+    "download-assets": "node database/download_assets.js",
+    "vercel-build": "node database/download_assets.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-validator": "^7.1.0",
