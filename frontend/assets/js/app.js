@@ -1,7 +1,7 @@
 // ArenaGo Global App Helpers
 // Gunakan URL Vercel jika sedang di production, jika tidak, gunakan localhost
 const isProduction = window.location.hostname.includes('vercel.app');
-const BASE_URL = isProduction ? `https://${window.location.hostname}` : 'http://localhost:3000';
+const BASE_URL = isProduction ? `https://${window.location.hostname}` : 'https://arenago.biz.id';
 
 console.log(`API Base URL set to: ${BASE_URL}`); // Tambahkan ini untuk debugging
 

@@ -69,7 +69,7 @@ Menjalankan backend secara statis standar:
 npm start
 ```
 
-Server backend REST API akan mendengarkan di alamat `http://localhost:3000/`.
+Server backend REST API akan mendengarkan di alamat `https://arenago.biz.id/`.
 
 ---
 

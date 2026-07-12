@@ -1,6 +1,6 @@
 // ArenaGo Frontend Auth Handler
 const isProdAuth = window.location.hostname.includes('vercel.app');
-const BASE_API_URL = isProdAuth ? `https://${window.location.hostname}/api/v1` : 'http://localhost:3000/api/v1';
+const BASE_API_URL = isProdAuth ? `https://${window.location.hostname}/api/v1` : 'https://arenago.biz.id/api/v1';
 
 console.log(`Auth API URL set to: ${BASE_API_URL}`);
 
