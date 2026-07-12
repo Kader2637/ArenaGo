@@ -236,7 +236,7 @@
             <td class="pe-4">
               <div class="d-flex gap-1">
                 ${b.status === 'waiting_verification'
-            ? `<button class="btn btn-sm btn-success rounded fw-semibold" onclick="openVerify('${b.id}', '${b.kode_booking}', '${b.nama_user}', '${App.formatRupiah(parseFloat(b.total))}', '${b.bukti_pembayaran || ''}')">
+            ? `<button class="btn btn-sm btn-success rounded fw-semibold" onclick="openVerify(event, '${b.id}', '${b.kode_booking}', '${b.nama_user}', '${App.formatRupiah(parseFloat(b.total))}', '${b.bukti_pembayaran || ''}')">
                       <i class="bi bi-shield-check me-1"></i>Verifikasi
                     </button>`
             : ''
@@ -265,7 +265,8 @@
       return map[s] || s;
     }
 
-    function openVerify(bookingId, kode, nama, total, bukti) {
+    function openVerify(event, bookingId, kode, nama, total, bukti) {
+      event.preventDefault();
       currentBookingId = bookingId;
       document.getElementById('verify-catatan').value = '';
       document.getElementById('booking-verify-detail').innerHTML = `
