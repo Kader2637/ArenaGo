@@ -61,8 +61,9 @@ async function run() {
 
     // Adjust destination for Vercel environment
     if (isVercel) {
-      const vercelUploadDir = '/tmp/uploads';
-      fullPath = path.join(vercelUploadDir, path.basename(asset.dest));
+      // Recreate the 'backend/uploads' structure inside '/tmp'
+      // asset.dest is e.g., 'backend/uploads/soccer.jpg'
+      fullPath = path.join('/tmp', asset.dest);
     } else {
       fullPath = path.join(__dirname, '..', asset.dest);
     }

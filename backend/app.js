@@ -39,7 +39,7 @@ app.use((req, res, next) => {
 });
 
 // Serve uploaded images static path. In Vercel, this points to the temporary directory.
-const uploadDir = process.env.NODE_ENV === 'production' ? '/tmp/uploads' : path.join(__dirname, 'uploads');
+const uploadDir = process.env.VERCEL === '1' ? '/tmp/backend/uploads' : path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadDir));
 
 // Serve frontend assets and pages

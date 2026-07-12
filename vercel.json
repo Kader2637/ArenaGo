@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/uploads/(.*)",
-      "dest": "/tmp/uploads/$1"
+      "dest": "/tmp/backend/uploads/$1"
     },
     {
       "src": "/api/(.*)",
