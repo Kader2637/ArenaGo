@@ -9,9 +9,13 @@ class FieldRepository extends BaseRepository {
 
   async findFields(filters = {}, options = {}) {
     const { cabang_id, kategori_id, tipe, status, search, min_price, max_price, kota } = filters;
-    const { limit = 10, page = 1, sort = 'l.created_at DESC' } = options;
+
+    // Sanitize and parse pagination options to prevent type errors
+    const limit = parseInt(options.limit, 10) || 10;
+    const page = parseInt(options.page, 10) || 1;
+    const sort = options.sort || 'l.created_at DESC';
     const offset = (page - 1) * limit;
-    
+
     let queryText = `
       SELECT l.*, c.nama as nama_cabang, c.kota, c.alamat as alamat_cabang, k.nama as nama_kategori,
              (SELECT foto FROM galeri WHERE lapangan_id = l.id ORDER BY created_at ASC LIMIT 1) as foto,
