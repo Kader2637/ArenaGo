@@ -161,7 +161,7 @@ const App = {
     const userProfileName = document.getElementById('nav-user-name');
     const userRoleBadge = document.getElementById('nav-user-role');
     const userAvatar = document.getElementById('nav-user-avatar');
-    
+
     // Highlight active navbar link
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.navbar-custom .nav-link');
@@ -183,18 +183,18 @@ const App = {
 
     if (Auth.isAuthenticated()) {
       const user = Auth.getUser();
-      
+
       if (loginBtn) loginBtn.classList.add('d-none');
       if (registerBtn) registerBtn.classList.add('d-none');
       if (profileDropdown) profileDropdown.classList.remove('d-none');
-      
+
       if (userProfileName) userProfileName.textContent = user.nama;
       if (userRoleBadge) {
         userRoleBadge.textContent = user.role.replace('_', ' ');
       }
-      
+
       if (userAvatar && user.foto) {
-        userAvatar.src = `${BASE_URL}/uploads/users/${user.foto}`;
+        userAvatar.src = `${BASE_URL}/uploads/${user.foto}`;
       }
 
       // Show specific navbar routes
@@ -322,9 +322,9 @@ const App = {
   initNavbarScroll() {
     const navbar = document.querySelector('.navbar-custom');
     const hasHero = document.querySelector('.hero-section');
-    
+
     if (!navbar) return;
-    
+
     const setWhiteNavbar = () => {
       navbar.style.background = '#ffffff';
       navbar.style.backdropFilter = 'none';
@@ -332,9 +332,9 @@ const App = {
       navbar.style.borderBottom = '1px solid rgba(226, 232, 240, 0.8)';
       navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.05)';
       navbar.style.padding = '14px 0';
-      
+
       navbar.classList.remove('navbar-dark-theme');
-      
+
       const navLinks = navbar.querySelectorAll('.nav-link');
       navLinks.forEach(link => {
         link.style.setProperty('color', '#0f172a', 'important');
@@ -352,7 +352,7 @@ const App = {
         if (nameNode) nameNode.style.setProperty('color', '#0f172a', 'important');
       }
     };
-    
+
     const setTransparentNavbar = () => {
       navbar.style.background = 'rgba(255, 255, 255, 0.15)';
       navbar.style.backdropFilter = 'blur(25px)';
@@ -360,9 +360,9 @@ const App = {
       navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
       navbar.style.boxShadow = 'none';
       navbar.style.padding = '20px 0';
-      
+
       navbar.classList.add('navbar-dark-theme');
-      
+
       const navLinks = navbar.querySelectorAll('.nav-link');
       navLinks.forEach(link => {
         link.style.setProperty('color', 'rgba(255, 255, 255, 0.9)', 'important');
@@ -380,12 +380,12 @@ const App = {
         if (nameNode) nameNode.style.setProperty('color', '#ffffff', 'important');
       }
     };
-    
+
     if (!hasHero) {
       setWhiteNavbar();
       return; // Keep it permanently white on standard pages
     }
-    
+
     const handleScroll = () => {
       if (window.scrollY > 30) {
         setWhiteNavbar();
@@ -393,7 +393,7 @@ const App = {
         setTransparentNavbar();
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Run immediately
   }
