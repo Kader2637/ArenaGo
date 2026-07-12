@@ -22,6 +22,12 @@ if (process.env.APP_ENV === 'production') {
 // Buat instance Pool dengan konfigurasi yang sudah disesuaikan
 const pool = new Pool(poolConfig);
 
+// Tambahkan event listener untuk error pada pool koneksi
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
 // Export object yang bisa digunakan di semua repository
 module.exports = {
   query: (text, params) => pool.query(text, params),

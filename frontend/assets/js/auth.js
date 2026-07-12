@@ -1,5 +1,8 @@
 // ArenaGo Frontend Auth Handler
-const API_URL = 'http://localhost:3000/api/v1';
+const isProdAuth = window.location.hostname.includes('vercel.app');
+const BASE_API_URL = isProdAuth ? `https://${window.location.hostname}/api/v1` : 'http://localhost:3000/api/v1';
+
+console.log(`Auth API URL set to: ${BASE_API_URL}`);
 
 const Auth = {
   getToken() {
@@ -24,7 +27,7 @@ const Auth = {
     const profileStr = localStorage.getItem('mitraProfile');
     return profileStr ? JSON.parse(profileStr) : null;
   },
-  
+
   getStaffCabang() {
     const staffStr = localStorage.getItem('staffCabang');
     return staffStr ? JSON.parse(staffStr) : null;
@@ -54,13 +57,13 @@ const Auth = {
 
   async login(email, password) {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${BASE_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
       const resData = await response.json();
-      
+
       if (!resData.success) {
         throw new Error(resData.message || 'Login gagal');
       }
@@ -75,7 +78,7 @@ const Auth = {
 
   async register(nama, email, password, confirm_password, no_hp, role) {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const response = await fetch(`${BASE_API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nama, email, password, confirm_password, no_hp, role })
@@ -97,7 +100,7 @@ const Auth = {
       const rToken = this.getRefreshToken();
       if (!rToken) throw new Error('No refresh token available');
 
-      const response = await fetch(`${API_URL}/auth/refresh`, {
+      const response = await fetch(`${BASE_API_URL}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: rToken })
@@ -120,7 +123,7 @@ const Auth = {
   async logout() {
     try {
       const rToken = this.getRefreshToken();
-      await fetch(`${API_URL}/auth/logout`, {
+      await fetch(`${BASE_API_URL}/auth/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: rToken })
@@ -136,7 +139,7 @@ const Auth = {
   // Perform Fetch with automatic JWT authorization header attaching & token refreshing
   async fetchWithAuth(url, options = {}) {
     let token = this.getToken();
-    
+
     // Setup request headers
     options.headers = options.headers || {};
     if (token) {
@@ -150,7 +153,7 @@ const Auth = {
 
     try {
       let response = await fetch(url, options);
-      
+
       // Access token expired, attempt refresh
       if (response.status === 401 && this.getRefreshToken()) {
         const newToken = await this.refreshAccessToken();
