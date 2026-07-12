@@ -33,15 +33,15 @@ class BaseRepository {
       queryText += ` ORDER BY ${sort}`;
     }
 
-    // Ensure limit and page are integers for pagination
-    const limitInt = parseInt(limit, 10);
-    if (!isNaN(limitInt) && limitInt > 0) {
+    // CRITICAL FIX: Always apply a sensible default limit to prevent memory crashes.
+    // This ensures that even if no limit is provided, we don't try to fetch the entire table.
+    const limitInt = parseInt(limit, 10) || 100; // Default to 100 if limit is not provided or invalid
+    const pageInt = parseInt(page, 10) || 1;
+    const offset = (pageInt - 1) * limitInt;
+
+    if (limitInt > 0) {
       queryText += ` LIMIT ${limitInt}`;
-      const pageInt = parseInt(page, 10) || 1;
-      if (pageInt > 1) {
-        const offset = (pageInt - 1) * limitInt;
-        queryText += ` OFFSET ${offset}`;
-      }
+      if (offset > 0) queryText += ` OFFSET ${offset}`;
     }
 
     const result = await db.query(queryText, values);
