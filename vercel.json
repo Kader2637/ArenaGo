@@ -6,29 +6,18 @@
       "use": "@vercel/node"
     },
     {
-      "src": "backend/uploads/**/*",
-      "use": "@vercel/static"
-    },
-    {
       "src": "frontend/**/*",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/app.js"
-    },
-    {
       "src": "/uploads/(.*)",
       "dest": "/backend/uploads/$1"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/",
-      "dest": "/frontend/customer/index.html"
+      "src": "/api/(.*)",
+      "dest": "/backend/app.js"
     },
     {
       "src": "/(.*)",
