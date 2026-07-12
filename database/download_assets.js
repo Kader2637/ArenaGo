@@ -19,6 +19,9 @@ const assets = [
   { url: 'https://images.unsplash.com/photo-1518063319789-7217e6706b04?auto=format&fit=crop&q=80&w=600', dest: 'backend/uploads/lapangan/futsal_batu.jpg' }
 ];
 
+// Determine the base path for uploads. In Vercel, this should be /tmp.
+const isVercel = process.env.VERCEL === '1';
+
 function ensureDirExists(filePath) {
   const dirname = path.dirname(filePath);
   if (!fs.existsSync(dirname)) {
@@ -54,14 +57,18 @@ function downloadFile(fileUrl, dest) {
 async function run() {
   console.log('Downloading category and court assets...');
   for (const asset of assets) {
-    const fullPath = path.join(__dirname, '..', asset.dest);
+    // Adjust destination for Vercel environment
+    const destination = isVercel
+      ? asset.dest.replace('backend/uploads', '/tmp/uploads')
+      : asset.dest;
+    const fullPath = isVercel ? destination : path.join(__dirname, '..', destination);
     try {
       await downloadFile(asset.url, fullPath);
     } catch (err) {
       console.warn(`Failed to download ${asset.dest}: ${err.message}. Writing mock fallback...`);
       // Writing a tiny mock file to avoid broken image links
       ensureDirExists(fullPath);
-      fs.writeFileSync(fullPath, Buffer.from('RIFF....WEBPVP8 ', 'binary')); 
+      fs.writeFileSync(fullPath, Buffer.from('RIFF....WEBPVP8 ', 'binary'));
     }
   }
   console.log('Assets download done.');
