@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="/assets/css/style.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
   <div class="admin-wrapper">
@@ -18,7 +20,8 @@
       </button>
       <a href="/" class="d-flex align-items-center text-decoration-none">
         <i class="bi bi-lightning-fill text-primary me-1"></i>
-        <span class="fw-bold" style="color:var(--primary-color)">Arena<span style="color:var(--text-dark)">Go</span></span>
+        <span class="fw-bold" style="color:var(--primary-color)">Arena<span
+            style="color:var(--text-dark)">Go</span></span>
       </a>
     </div>
     <!-- Sidebar Placeholder -->
@@ -36,7 +39,8 @@
       <div class="premium-card p-3 bg-white mb-4 shadow-sm">
         <div class="row g-2 align-items-center">
           <div class="col-md-4">
-            <input type="text" class="form-control" id="search-input" placeholder="Cari kode booking / nama customer...">
+            <input type="text" class="form-control" id="search-input"
+              placeholder="Cari kode booking / nama customer...">
           </div>
           <div class="col-md-3">
             <select class="form-select" id="status-filter">
@@ -103,7 +107,8 @@
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold text-secondary small">Catatan Admin (opsional)</label>
-            <textarea class="form-control" id="verify-catatan" rows="2" placeholder="Misal: Nominal sesuai, disetujui."></textarea>
+            <textarea class="form-control" id="verify-catatan" rows="2"
+              placeholder="Misal: Nominal sesuai, disetujui."></textarea>
           </div>
         </div>
         <div class="modal-footer border-0 pt-0 gap-2">
@@ -138,7 +143,8 @@
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold text-secondary small">Catatan (opsional)</label>
-            <textarea class="form-control" id="status-catatan" rows="2" placeholder="Alasan perubahan status..."></textarea>
+            <textarea class="form-control" id="status-catatan" rows="2"
+              placeholder="Alasan perubahan status..."></textarea>
           </div>
         </div>
         <div class="modal-footer border-0 pt-0">
@@ -223,18 +229,18 @@
             <td><span class="badge-status ${b.status}">${formatStatus(b.status)}</span></td>
             <td>
               ${b.bukti_pembayaran
-                ? `<a href="${BASE_URL}/uploads/payments/${b.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-primary rounded"><i class="bi bi-image me-1"></i>Lihat</a>`
-                : '<span class="text-muted small">—</span>'
-              }
+            ? `<a href="${BASE_URL}/uploads/payments/${b.bukti_pembayaran}" target="_blank" class="btn btn-sm btn-outline-primary rounded"><i class="bi bi-image me-1"></i>Lihat</a>`
+            : '<span class="text-muted small">—</span>'
+          }
             </td>
             <td class="pe-4">
               <div class="d-flex gap-1">
                 ${b.status === 'waiting_verification'
-                  ? `<button class="btn btn-sm btn-success rounded fw-semibold" onclick="openVerify('${b.id}', '${b.kode_booking}', '${b.nama_user}', '${App.formatRupiah(parseFloat(b.total))}', '${b.bukti_pembayaran || ''}')">
+            ? `<button class="btn btn-sm btn-success rounded fw-semibold" onclick="openVerify('${b.id}', '${b.kode_booking}', '${b.nama_user}', '${App.formatRupiah(parseFloat(b.total))}', '${b.bukti_pembayaran || ''}')">
                       <i class="bi bi-shield-check me-1"></i>Verifikasi
                     </button>`
-                  : ''
-                }
+            : ''
+          }
                 <button class="btn btn-sm btn-outline-secondary rounded" onclick="openChangeStatus('${b.id}', '${b.kode_booking}', '${b.status}')">
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -294,7 +300,8 @@
         verifyModal.hide();
         const data = await res.json();
         if (data.success) {
-          App.showAlert(action === 'verified' ? 'Pembayaran Disetujui!' : 'Pembayaran Ditolak', data.message, action === 'verified' ? 'success' : 'warning').then(() => loadBookings());
+          App.showAlert(action === 'verified' ? 'Pembayaran Disetujui!' : 'Pembayaran Ditolak', data.message, action === 'verified' ? 'success' : 'warning');
+          loadBookings();
         } else {
           App.showAlert('Gagal', data.message, 'error');
         }
@@ -336,4 +343,5 @@
     }
   </script>
 </body>
+
 </html>
